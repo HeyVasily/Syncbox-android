@@ -15,6 +15,8 @@ The riskiest assumptions are proven on the emulator: embedding Syncthing, select
 - [ ] Syncthing runs in-process and pairs with a peer.
 - [ ] One selected file syncs into internal storage, and an unselected file does not.
 - [ ] Deselecting a file behaves as designed.
+- [ ] A sync continues after the app is minimized and shows progress in a notification.
+- [ ] Pause and stop end the job and stop Syncthing. Resuming continues from the partial download, and how long Syncthing keeps partial files is recorded.
 - [ ] The file opens and seeks in VLC through `FileProvider`.
 - [ ] External subtitle behaviour in VLC is recorded.
 

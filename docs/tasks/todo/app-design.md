@@ -11,7 +11,7 @@ outcome:
 The screens, flows and visual style of the first release are designed and agreed before implementation starts.
 
 ## Acceptance
-- [ ] The first-release user flows are documented, including pairing, file selection, manual sync and opening a video.
+- [ ] The first-release user flows are documented, including pairing, connecting and refreshing the file list on app open, file selection, starting sync with a button, the sync notification with progress, stop and pause, and opening a video.
 - [ ] The user approves the design.
 
 ## Next
