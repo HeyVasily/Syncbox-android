@@ -21,7 +21,11 @@ All decided on 2026-11-02.
 
 ## Proposed, not yet confirmed
 
-- **Syncthing integration:** run Syncthing as an in-process Go library with a thin bridge, controlled through its REST API. Syncthing has no official SDK.
+- **Syncthing integration:** run Syncthing as an in-process Go library through a thin gomobile bridge, controlled through its REST API. Syncthing has no official SDK.
+- **Toolchain starting point:** Go 1.27.3, NDK r30, Syncthing v2.1.7, AGP 9.5.0 and target SDK 36, per the [16 KB research](research/16kb-page-size.md). The full combination has not been built yet. Re-check versions when the project is set up.
+- **ABIs:** ship `arm64-v8a`. Use `x86_64` for emulator testing, possibly only in a test variant.
+- **16 KB checks:** native libraries stay uncompressed (`useLegacyPackaging = false`). CI checks ELF alignment of every 64-bit library and ZIP alignment of APKs, including those generated from the App Bundle.
+- **16 KB runtime testing:** test inside the installed app, not through `adb shell`, because app seccomp rules do not apply there. Test on a 16 KB image with compatibility mode off, and on a normal 4 KB image at API 34.
 - **Sync direction:** computer to phone only, using a receive-only folder on the phone.
 - **Selective sync mechanism:** a whitelist in ignore patterns, with the app deleting local copies when a file is deselected. Behaviour still has to be verified.
 - **Pause and stop behaviour:** both end the job and stop Syncthing, so a paused sync uses no battery. Pause keeps a notification with a resume action, and resuming opens the app, because scheduling a UIDT job generally requires the app to be visible. Stop removes the notification. Partial downloads are kept for later, for as long as Syncthing retains them. All of this still has to be verified.
@@ -31,6 +35,5 @@ All decided on 2026-11-02.
 - **App name:** to be discussed. See the `decide-app-name` task.
 - **Background sync design:** to be discussed after the first release. See the `background-sync-design` task.
 - **Verification setup:** how an agent reproduces and checks everything. See the `verification-setup` task.
-- **16 KB memory pages:** being researched. See the `research-16kb-page-size` task.
 - **App design:** to be developed together. See the `app-design` task.
 - **Agent commits and operator control:** whether agents should be allowed to commit, and where the operator's control boundary should sit. See the `agent-commit-policy` task.

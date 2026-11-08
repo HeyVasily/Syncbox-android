@@ -19,6 +19,7 @@ The riskiest assumptions are proven on the emulator: embedding Syncthing, select
 - [ ] Pause and stop end the job and stop Syncthing. Resuming continues from the partial download, and how long Syncthing keeps partial files is recorded.
 - [ ] The file opens and seeks in VLC through `FileProvider`.
 - [ ] External subtitle behaviour in VLC is recorded.
+- [ ] The acceptance tests from section 5 of `docs/research/16kb-page-size.md` that apply to the prototype pass inside the installed app on a 16 KB image with compatibility mode off.
 
 ## Next
 Do not start until `app-design` and `verification-setup` are in `done/`. Set `touches` when the task is claimed.
