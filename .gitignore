@@ -1,0 +1,18 @@
+# Local tools and check output
+.build/
+
+# Android and Gradle
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.cxx/
+.externalNativeBuild/
+captures/
+
+# Signing material
+*.jks
+*.keystore
+keystore.properties
+signing.properties
