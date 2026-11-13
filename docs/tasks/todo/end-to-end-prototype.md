@@ -5,7 +5,6 @@ depends_on:
   - app-design
   - verification-setup
 touches: []
-outcome:
 ---
 
 ## Goal
@@ -22,7 +21,7 @@ The riskiest assumptions are proven on the emulator: embedding Syncthing, select
 - [ ] The acceptance tests from section 5 of `docs/research/16kb-page-size.md` that apply to the prototype pass inside the installed app on a 16 KB image with compatibility mode off.
 
 ## Next
-Do not start until `app-design` and `verification-setup` are in `done/`. Set `touches` when the task is claimed.
+Do not start until the `app-design` and `verification-setup` task files are deleted. Set `touches` when the task is claimed.
 
 ## Log
 - 2026-11-02T00:00Z claude-opus: created. The user asked for no prototypes until design and setup are finished.

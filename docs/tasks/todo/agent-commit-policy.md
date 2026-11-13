@@ -6,7 +6,6 @@ touches:
   - docs/decisions.md
   - docs/tasks/README.md
   - AGENTS.md
-outcome:
 ---
 
 ## Goal

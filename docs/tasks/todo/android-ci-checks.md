@@ -7,7 +7,6 @@ touches:
   - .github/
   - dev/
   - docs/ci.md
-outcome:
 ---
 
 ## Goal

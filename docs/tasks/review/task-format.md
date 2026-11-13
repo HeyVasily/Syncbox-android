@@ -4,7 +4,6 @@ assignee: agent
 depends_on: []
 touches:
   - docs/tasks/README.md
-outcome:
 ---
 
 ## Goal

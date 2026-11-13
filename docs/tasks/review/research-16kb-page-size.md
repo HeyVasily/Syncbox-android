@@ -4,7 +4,6 @@ assignee: user
 depends_on: []
 touches:
   - docs/research/16kb-page-size.md
-outcome:
 ---
 
 ## Goal

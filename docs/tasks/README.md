@@ -10,7 +10,6 @@ Each task is one Markdown file. The folder holding the file is the task's status
 | `doing/` | An agent is working on it |
 | `blocked/` | Cannot continue; the task's `Next` section says why |
 | `review/` | Finished, waiting for the user to accept |
-| `done/` | Accepted by the user, or dropped (see `outcome`) |
 
 ## Task file
 
@@ -20,9 +19,8 @@ The file name is the task ID: a unique, descriptive kebab-case slug such as `app
 ---
 title: Short task title
 assignee: agent        # agent | user | together
-depends_on: []         # slugs that must be in done/
+depends_on: []         # slugs of tasks that must be finished (file deleted)
 touches: []            # paths or globs this task will edit
-outcome:               # completed | dropped, set when moved to done/
 ---
 
 ## Goal
@@ -40,11 +38,11 @@ The exact next action, written so a new agent can continue from here. Replace th
 
 ## Working on a task
 
-1. **Pick:** choose a task in `todo/` with `assignee: agent`, all `depends_on` in `done/`, and `touches` that do not overlap any task in `doing/`. Agents do not pick `user` or `together` tasks unless asked.
+1. **Pick:** choose a task in `todo/` with `assignee: agent`, no `depends_on` task file left in `docs/tasks/`, and `touches` that do not overlap any task in `doing/`. Agents do not pick `user` or `together` tasks unless asked.
 2. **Claim:** run `mv docs/tasks/todo/<slug>.md docs/tasks/doing/<slug>.md`. A rename is atomic, so one agent wins. If it fails, another agent got there first: pick a different task.
 3. **Confirm:** add a Log entry with your agent name. Check `doing/` again, and if `touches` now overlaps another task, move yours back to `todo/` and pick again.
 4. **Checkpoint:** after every meaningful step, tick `Acceptance`, rewrite `Next`, and append to `Log`. Do this before starting anything long, because a stop can happen at any moment.
-5. **Finish:** run the checks, record the evidence in `Log`, and move the file to `review/`. Only the user moves tasks to `done/`, unless the user asks an agent to do it.
+5. **Finish:** run the checks, record the evidence in `Log`, and move the file to `review/`. When the user accepts or drops a task, its file is deleted; git history keeps it. Only the user decides this, and an agent deletes the file only when asked.
 
 If stuck, write the reason and the question in `Next` and move the file to `blocked/`. If new work appears, add a new file to `todo/` instead of growing the current task.
 

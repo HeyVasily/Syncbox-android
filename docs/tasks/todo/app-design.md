@@ -4,7 +4,6 @@ assignee: together
 depends_on: []
 touches:
   - docs/design/**
-outcome:
 ---
 
 ## Goal
