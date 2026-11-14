@@ -1,6 +1,6 @@
 # Screens and flows, first release
 
-Status: draft, not yet approved. Visual style and control layout are in [ui.md](ui.md).
+Status: approved by the user on 2026-11-14. Visual style and control layout are in [ui.md](ui.md).
 
 ## Screens
 
