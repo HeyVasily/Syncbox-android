@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Avoska</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="of">of</string>
+    <string name="separator">"\u0020·\u0020"</string>
+    <string name="connected">Connected</string>
+    <string name="offline">Offline</string>
+
+    <!-- Files: top bar and tabs -->
+    <string name="settings">Settings</string>
+    <string name="status_connecting">Connecting…</string>
+    <plurals name="status_connected">
+        <item quantity="one">%1$d of %2$d device connected</item>
+        <item quantity="other">%1$d of %2$d devices connected</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_offline_mode">Offline mode</string>
+    <string name="tab_all_files">All files</string>
+    <string name="tab_on_device">On device · %1$s</string>
+    <string name="tab_on_device_plain">On device</string>
+    <string name="sort_by">Sort by</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_size">Size</string>
+    <string name="sort_date">Date</string>
+    <string name="offline_banner">Offline mode is on. The list is from the last connection.</string>
+    <string name="turn_off">Turn off</string>
+    <string name="offer_banner">%1$s wants to share the folder %2$s</string>
+    <string name="empty_on_device">Nothing is kept on this device yet. Turn on the switch next to a file to keep it.</string>
+    <string name="empty_folder">This folder is empty.</string>
+
+    <!-- Files: rows -->
+    <string name="state_on_device">On device</string>
+    <string name="state_outdated">On device, outdated</string>
+    <string name="state_outdated_short">Outdated</string>
+    <string name="state_waiting_for_sync">Waiting for sync</string>
+    <string name="state_waiting">Waiting</string>
+    <string name="state_downloading">Downloading</string>
+    <string name="state_some_selected">Some files selected</string>
+    <string name="keep_on_device">Keep on device</string>
+    <string name="more_actions">More actions for %1$s</string>
+
+    <!-- Files: bottom bar -->
+    <string name="to_download">%1$s to download</string>
+    <string name="nothing_to_download">Everything is on the device</string>
+    <string name="free_on_device">%1$s free on device</string>
+    <string name="block_offline_mode">Sync is unavailable in offline mode</string>
+    <string name="block_no_device">No device connected</string>
+    <string name="block_network_off">Sync is off in Settings</string>
+    <string name="block_not_enough_space">%1$s more free space needed</string>
+    <string name="block_not_enough_space_short">Not enough free space</string>
+    <string name="failure_connection_lost">Sync stopped: connection lost</string>
+    <string name="failure_out_of_space">Sync stopped: out of space</string>
+    <string name="sync">Sync</string>
+    <string name="syncing_percent">Syncing · %1$d%%</string>
+    <string name="sync_paused">Sync paused</string>
+    <string name="sync_file_progress">%1$s · file %2$d of %3$d</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+
+    <!-- Files: menu and dialogs -->
+    <string name="action_open">Open</string>
+    <string name="action_download_now">Download now</string>
+    <string name="action_download_now_hint">Downloads it now, on any network</string>
+    <string name="action_download_new_version_hint">Gets the new version, on any network</string>
+    <string name="action_download_unavailable_hint">Needs a connected device</string>
+    <string name="action_remove">Remove from device</string>
+    <string name="action_details">Details</string>
+    <string name="remove_title">Remove from device?</string>
+    <string name="remove_file_text">%1$s will be deleted from this phone. This frees %2$s. The file stays on your other devices.</string>
+    <string name="remove_folder_text">Files in %1$s will be deleted from this phone. This frees %2$s. The files stay on your other devices.</string>
+    <string name="remove">Remove</string>
+    <string name="details_size">Size: %1$s</string>
+    <string name="details_modified">Modified: %1$s</string>
+    <string name="details_location">Folder: %1$s</string>
+    <string name="details_state">State: %1$s</string>
+    <string name="state_not_selected">Not on device</string>
+    <string name="message_opened">Demo: %1$s would open in another app</string>
+    <string name="message_download_unavailable">No device is connected, so nothing can be downloaded</string>
+
+    <!-- Settings -->
+    <string name="section_devices">Devices</string>
+    <string name="section_folders">Folders</string>
+    <string name="section_sync">Sync</string>
+    <string name="section_this_phone">This phone</string>
+    <string name="add_device">Add device</string>
+    <plurals name="folder_devices">
+        <item quantity="one">%1$d device</item>
+        <item quantity="other">%1$d devices</item>
+    </plurals>
+    <string name="sync_network">Sync network</string>
+    <string name="offline_mode">Offline mode</string>
+    <string name="offline_mode_hint">The app uses no network</string>
+    <string name="show_my_device_id">Show my device ID</string>
+    <string name="storage">Storage</string>
+    <string name="storage_value">%1$s used · %2$s free</string>
+    <string name="about">About and licences</string>
+    <string name="about_text">Avoska %1$s, demo build with example data. A Syncthing client. Open-source licences are listed here once the app has dependencies beyond AndroidX and QR Code generator (MIT).</string>
+
+    <!-- Sync network -->
+    <string name="sync_network_intro">Where the Sync button may download. Downloading one file from its menu works on any network.</string>
+    <string name="network_off">Off</string>
+    <string name="network_off_hint">No Sync. Only single-file downloads.</string>
+    <string name="network_wifi">Wi-Fi</string>
+    <string name="network_wifi_hint">Default</string>
+    <string name="network_wifi_mobile">Wi-Fi and mobile data</string>
+    <string name="network_wifi_mobile_hint">Not while roaming</string>
+    <string name="network_any">Any network</string>
+    <string name="network_any_hint">Including roaming</string>
+
+    <!-- My device ID -->
+    <string name="my_device_id">My device ID</string>
+    <string name="my_device_id_intro">Another device can scan this code or use the text ID to add this phone.</string>
+    <string name="qr_code_description">QR code of this phone\'s device ID</string>
+    <string name="share">Share</string>
+    <string name="copy">Copy</string>
+
+    <!-- Pairing -->
+    <string name="add_a_device">Add a device</string>
+    <string name="add_device_intro">Open Syncthing on the computer, choose Actions, then Show ID. Scan the QR code shown there or paste the device ID.</string>
+    <string name="scan_qr_code">Scan QR code</string>
+    <string name="or">or</string>
+    <string name="device_id">Device ID</string>
+    <string name="device_id_placeholder">XXXXXXX-XXXXXXX-…</string>
+    <string name="paste">Paste</string>
+    <string name="invalid_device_id">This is not a valid device ID</string>
+    <string name="scan_demo">Demo: the camera is not used, an example ID was filled in</string>
+    <string name="connect_a_folder">Connect a folder</string>
+    <string name="waiting_for_device">Waiting for the device</string>
+    <string name="waiting_hint">In Syncthing on the computer, confirm this phone as a new device. Both devices must be online and must have added each other.</string>
+    <string name="folder_offer">%1$s wants to share this folder</string>
+    <string name="folder_offer_hint">Nothing is downloaded until you select files and press Sync.</string>
+    <string name="ignore">Ignore</string>
+    <string name="accept">Accept</string>
+    <string name="no_offer_hint">No offer yet? In Syncthing on the computer, confirm this phone as a new device and share a folder with it. Both devices must be online.</string>
+    <string name="add_another_device">Add another device</string>
+    <string name="done">Done</string>
+    <string name="device_connected_hint">The device is connected. Folders it shares are offered on the Files screen.</string>
+</resources>
