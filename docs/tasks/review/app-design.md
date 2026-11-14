@@ -11,10 +11,10 @@ The screens, flows and visual style of the first release are designed and agreed
 
 ## Acceptance
 - [x] The first-release user flows are documented, including pairing, connecting and refreshing the file list on app open, file selection, starting sync with a button, the sync notification with progress, stop and pause, and opening a video.
-- [ ] The user approves the design.
+- [x] The user approves the design.
 
 ## Next
-The private design canvas shows the chosen design on 12 screens, light and dark: Files (all files, on device, syncing, file menu, remove confirmation, offline mode), Settings, sync network, my device ID, add device, folder offer, notification states. Get the user's corrections and approval, then tick the last acceptance box and move the task to `review/`.
+Finished: the user approved the design on 2026-11-14. Delete this file when the user confirms.
 
 ## Log
 - 2026-11-02T00:00Z claude-opus: created.
@@ -26,3 +26,4 @@ The private design canvas shows the chosen design on 12 screens, light and dark:
 - 2026-11-14T00:00Z claude-opus: user chose the control layout: variant A plus All files / On device tabs plus a per-file menu. Recorded in `docs/design/ui.md`, flows updated.
 - 2026-11-14T01:00Z claude-opus: redrew the canvas in the chosen layout, added the missing screens, removed the rejected layout options.
 - 2026-11-14T01:30Z claude-opus: saved the mockups as standalone HTML in `docs/design/mockups/` at the user's request. Rendered with headless Chromium and checked: all four files display correctly in both themes.
+- 2026-11-14T02:30Z claude-opus: the user approved the design ("design approved"). Evidence: flows in `docs/design/flows.md`, style and layout in `docs/design/ui.md`, mockups in `docs/design/mockups/` rendered and checked. Moved to `review/`.

@@ -375,7 +375,7 @@ private fun DemoState.folderEntry(ref: FileRef, content: List<DemoFile>): Entry 
     return Entry(
         ref = ref,
         kind = FileKind.FOLDER,
-        sizeBytes = content.sumOf { it.sizeBytes },
+        sizeBytes = content.filter { it.keep }.sumOf { it.sizeBytes },
         modifiedMillis = content.maxOf { it.modifiedMillis },
         keep = kept == content.size,
         state = state,

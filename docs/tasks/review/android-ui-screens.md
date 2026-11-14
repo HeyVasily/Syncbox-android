@@ -26,7 +26,7 @@ The first Gradle project exists. It shows every screen from `docs/design/mockups
 - [ ] The user accepts the screens and the engine seam.
 
 ## Next
-Wait for the user's review of the pull request. Open questions for the user: folder rows show the total size (as the mockup does) while `flows.md` says the selected size; the `applicationId` `app.avoska` is provisional; AndroidX versions are held back because only SDK platform 36 is installed.
+Merged as pull request #5. Wait for the user to accept the task. Since then the user decided: folder rows show the selected size (done in the `record-download-model` branch), `app.avoska` is final, and the project stays on SDK platform 36 for now.
 
 ## Log
 - 2026-11-14T02:40Z claude-opus: created at the user's request; developer and reviewer sessions ran in a separate worktree.
