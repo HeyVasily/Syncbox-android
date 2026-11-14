@@ -15,7 +15,8 @@ A final app name and `applicationId` are chosen before the first Google Play rel
 - [ ] The name and `applicationId` are recorded in `docs/decisions.md`.
 
 ## Next
-Discuss with the user. Known conflicts for "Syncbox": a "Syncbox Cloud Storage" app in the Microsoft Store, an unidentified service at syncbox.app, and several older sync tools with that name.
+Superseded by `rename-to-avoska`: the user chose "Avoska". Delete this file when the user confirms.
 
 ## Log
 - 2026-11-02T00:00Z claude-opus: created from the initial name check; trademark registers were not checked.
+- 2026-11-14T01:59Z claude-fable: the user chose "Avoska". The register checks and the `applicationId` moved to the `rename-to-avoska` task, so this task is superseded and waits for the user to drop it.
