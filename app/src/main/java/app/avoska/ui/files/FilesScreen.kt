@@ -363,7 +363,7 @@ private fun secondLine(row: FileRow) = buildAnnotatedString {
     val status = LocalStatusColors.current
     val sep = stringResource(R.string.separator)
     withStyle(SpanStyle(color = dim)) {
-        append(formatSize(entry.sizeBytes))
+        append(sizeText(entry))
         if (row.location != null) {
             append(sep)
             append(row.location)
@@ -373,7 +373,7 @@ private fun secondLine(row: FileRow) = buildAnnotatedString {
     val onDeviceTab = row.location != null
     val (text, color) = when (val state = entry.state) {
         EntryState.NotSelected -> null to dim
-        EntryState.SomeSelected -> stringResource(R.string.state_some_selected) to dim
+        EntryState.SomeSelected -> null to dim // the size part already says "selected"
         is EntryState.Waiting -> stringResource(
             if (state.queued) R.string.state_waiting else R.string.state_waiting_for_sync,
         ) to MaterialTheme.colorScheme.primary
@@ -485,6 +485,13 @@ private fun RunningBar(bar: SyncBar.Running, onPause: () -> Unit, onResume: () -
         progress = bar.doneBytes.toFloat() / bar.totalBytes.coerceAtLeast(1),
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
     )
+}
+
+@Composable
+internal fun sizeText(entry: Entry): String = when (val label = sizeLabel(entry)) {
+    is SizeLabel.Size -> formatSize(label.bytes)
+    is SizeLabel.Selected -> stringResource(R.string.size_selected, formatSize(label.bytes))
+    SizeLabel.NotSelected -> stringResource(R.string.folder_not_selected)
 }
 
 @Composable

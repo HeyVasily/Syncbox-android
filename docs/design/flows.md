@@ -1,6 +1,6 @@
 # Screens and flows, first release
 
-Status: draft, not yet approved. Visual style and control layout are in [ui.md](ui.md).
+Status: approved by the user on 2026-11-14. Visual style and control layout are in [ui.md](ui.md).
 
 ## Screens
 
@@ -18,12 +18,12 @@ The app follows the Syncthing model. It can be connected to any number of device
 
 ## When Syncthing runs
 
-- App visible: Syncthing runs, connects and refreshes the file list. Nothing is downloaded.
-- Connecting and refreshing the file list work on any network. The sync network setting (flow 9) limits only the Sync button.
+- App visible: Syncthing runs, connects and refreshes the file list on any network. Refreshing the list never downloads anything.
+- Downloads run only in a background job: Sync (flow 5), automatic updates (flow 5a) and Download now (flow 6). Sync and automatic updates run only on the networks the sync network setting (flow 9) allows.
 - Offline mode on: Syncthing does not run and the app uses no network.
 - Global discovery and relays are on, as in stock Syncthing, with no setting.
 - App leaves the screen with no sync running: Syncthing stops.
-- Sync running: Syncthing runs inside the UIDT job until the sync finishes, is paused or is stopped.
+- Download job running: Syncthing runs inside the job until it finishes, is paused or is stopped.
 
 ## Flows
 
@@ -78,6 +78,16 @@ If the network changes to one the setting does not allow, the sync pauses and th
 
 Files that changed on other devices and are selected on the phone are downloaded again in the same sync.
 
+### 5a. Automatic updates
+
+Selected content that changes on other devices downloads without pressing Sync: new versions of files on the device, and new files in selected folders.
+
+1. When the app refreshes the list and finds such changes, it starts a background download for them, on the networks the sync network setting allows. On another network it waits until an allowed one is available.
+2. The download continues after the app is closed, then ends. Progress shows in the bar while the app is open, and in the notification as in flow 7.
+3. Files newly selected by the user are not part of it: they wait for Sync or Download now.
+
+Checking for changes without opening the app comes after the first release.
+
 ### 6. Downloading one file
 
 - Download on a file selects it and downloads it at once, on any network and with any sync network setting.
@@ -110,7 +120,7 @@ If every device disconnects during a sync, the job waits for it to return until 
 - Devices: list with name and connection state, an action to add a device, and an action to remove one.
 - Folders: list with the devices each is shared with, and an action to remove a folder. Removing it asks to confirm deleting its downloaded files.
 - This phone's device ID: QR code and text.
-- Sync network: off; Wi-Fi (default); Wi-Fi and mobile data except roaming; any network. Off means there is no Sync, only single-file downloads. Automatic background sync, when it is added after the first release, will obey the same setting.
+- Sync network: off; Wi-Fi (default); Wi-Fi and mobile data except roaming; any network. It applies to Sync and automatic updates. Off means there is no Sync and no automatic updates, only single-file downloads. Periodic background sync, when it is added after the first release, will obey the same setting.
 - Offline mode: a toggle. When on, the app uses no network.
 - Storage: space used by downloaded files, free space.
 - About: version, open-source licences.

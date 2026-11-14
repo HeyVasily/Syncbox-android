@@ -33,6 +33,23 @@ fun sortRows(rows: List<FileRow>, order: SortOrder): List<FileRow> {
     return rows.sortedWith(compareByDescending<FileRow> { it.entry.isFolder }.then(byOrder))
 }
 
+/**
+ * How a row's size reads. Files: their size. Folders: their selected content, "Not selected"
+ * when nothing is, "2.9 GB selected" when only part is; a fully selected folder reads like a file.
+ */
+sealed interface SizeLabel {
+    data class Size(val bytes: Long) : SizeLabel
+    data class Selected(val bytes: Long) : SizeLabel
+    data object NotSelected : SizeLabel
+}
+
+fun sizeLabel(entry: Entry): SizeLabel = when {
+    !entry.isFolder -> SizeLabel.Size(entry.sizeBytes)
+    entry.state == EntryState.NotSelected -> SizeLabel.NotSelected
+    entry.state == EntryState.SomeSelected -> SizeLabel.Selected(entry.sizeBytes)
+    else -> SizeLabel.Size(entry.sizeBytes)
+}
+
 /** "Movies / Series" for a file in Series of the Movies folder. */
 fun locationOf(entry: Entry, folderLabel: String): String =
     (listOf(folderLabel) + entry.ref.parent.split('/').filter { it.isNotEmpty() }).joinToString(" / ")

@@ -43,7 +43,7 @@ fun FileMenuSheet(row: FileRow, canDownload: Boolean, onAction: (MenuAction) -> 
             MenuLine(
                 icon = rowIcon(row.entry),
                 title = row.entry.name,
-                hint = "${formatSize(row.entry.sizeBytes)}${stateSuffix(row.entry.state)}",
+                hint = sizeText(row.entry) + stateSuffix(row.entry.state),
                 enabled = true,
                 onClick = null,
             )
@@ -72,6 +72,8 @@ fun FileMenuSheet(row: FileRow, canDownload: Boolean, onAction: (MenuAction) -> 
 
 @Composable
 private fun stateSuffix(state: EntryState): String {
+    // A partly selected folder already says so in its size ("2.9 GB selected").
+    if (state == EntryState.SomeSelected) return ""
     val text = stateText(state) ?: return ""
     return stringResource(R.string.separator) + text
 }
@@ -157,7 +159,7 @@ fun DetailsDialog(row: FileRow, onDismiss: () -> Unit) {
         title = { Text(entry.name) },
         text = {
             Column {
-                Text(stringResource(R.string.details_size, formatSize(entry.sizeBytes)))
+                Text(stringResource(R.string.details_size, sizeText(entry)))
                 Text(stringResource(R.string.details_modified, date))
                 Text(stringResource(R.string.details_location, folder))
                 Text(stringResource(R.string.details_state, stateText(entry.state) ?: stringResource(R.string.state_not_selected)))

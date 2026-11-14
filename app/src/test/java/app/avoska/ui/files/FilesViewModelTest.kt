@@ -8,6 +8,7 @@ import app.avoska.engine.MB
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -74,6 +75,9 @@ class FilesViewModelTest {
         engine.pauseSync()
         viewModel.openFile(row("Drone footage raw.mov"))
         engine.stopSync() // stops the tap-download; the paused sync is still there
+        // The view model sees the stop on another thread. Without this wait the later download
+        // could reach it first, and the file would open.
+        withTimeout(TIMEOUT) { while (viewModel.isOpenPending) delay(1) }
         assertTrue(engine.status.value.sync!!.paused)
         engine.resumeSync()
         engine.advance(6_800 * MB) // the sync finishes; the drone file was not part of it

@@ -85,6 +85,9 @@ class FilesViewModel(
     private val local = MutableStateFlow(LocalUi())
     private var pendingOpen: Job? = null
 
+    /** True while a tapped file is downloading and will open when the download ends. */
+    internal val isOpenPending: Boolean get() = pendingOpen?.isActive == true
+
     private val onDeviceHere = engine.onDevice(folderId).map { list ->
         if (dir.isEmpty()) list else list.filter { it.ref.path.startsWith("$dir/") }
     }
