@@ -21,13 +21,13 @@ CI builds and checks the app once the Gradle project exists.
 - [ ] Dependabot also covers `gradle` and `gomod`; `govulncheck` runs on the Go bridge. Dependabot coverage is enforced by `dev/check-repo.sh`; OSV-Scanner audits `go.mod` daily. `govulncheck` is not added.
 - [ ] Release signing keys exist only as secrets of a protected environment, never in pull request workflows.
 - [ ] Decided with the user: instrumented tests on an emulator in CI, and a check that dependencies are free software for F-Droid.
-- [ ] The `android` job has passed in CI on the real Gradle project. It ran on 2026-11-14: build, Lint and 16 KB checks work, one unit test fails.
+- [ ] The `android` job has passed in CI on the real Gradle project. It ran on 2026-11-14: failed once on an unstable unit test, then passed.
 
 ## Next
-The Gradle project now exists and the checks ran on it for the first time (2026-11-14). Three of them fail and need a fix in the project, not in CI:
+The Gradle project now exists and the checks ran on it for the first time (2026-11-14). Three of them found problems that need a fix in the project, not in CI:
 1. `repository`: generate `gradle/verification-metadata.xml` (`./gradlew --write-verification-metadata sha256 lint testDebugUnitTest assembleDebug`, with `<verify-metadata>true</verify-metadata>`). Dependabot does not regenerate this file, so its Gradle pull requests fail until it is regenerated.
 2. `osv`: `engine/go.mod` has known advisories in `golang.org/x/crypto` 0.57.0 and `golang.org/x/net` 0.60.0. Update them, or accept each one with a reason in a root `osv-scanner.toml`.
-3. `android`: the unit test `FilesViewModelTest.stoppingTheTapDownloadEndsThePendingOpenEvenWithASetAsideSync` fails. Lint, the debug build and the 16 KB check of its 2 libraries pass.
+3. `android`: the unit test `FilesViewModelTest.stoppingTheTapDownloadEndsThePendingOpenEvenWithASetAsideSync` is unstable: it failed in the first run and passed in the second, on the same project code. Lint, the debug build and the 16 KB check of its 2 libraries pass.
 
 Then do the unchecked items above. Known traps: `testDebugUnitTest` does not exist once product flavors are added; the verification file also lists build-time artifacts, so the OSV audit may report advisories for them. Once the Go engine is always in the APK, make `dev/check-16kb.sh` fail when an ABI has no library. Ask the user about emulator tests and the F-Droid check.
 
