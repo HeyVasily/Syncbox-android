@@ -26,4 +26,4 @@ Tools are official release binaries pinned by version and SHA-256 in `dev/pinned
 
 ## Not covered yet
 
-See the `android-ci-checks` task: 16 KB checks of APKs generated from the App Bundle, `govulncheck` on the Go bridge, instrumented tests on an emulator, the release workflow with signing keys, and the F-Droid free-software check.
+See the `android-ci-checks` task: making the current checks pass on the project, 16 KB checks of APKs generated from the App Bundle, `govulncheck` on the Go bridge, instrumented tests on an emulator, the release workflow with signing keys, and the F-Droid free-software check.
