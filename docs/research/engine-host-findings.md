@@ -7,7 +7,7 @@ Measured facts about unmodified Syncthing, from the host-side tests in [`engine/
 - Syncthing v2.1.7, commit `d6d0181f7d466381c4b39ec8fd944c364f939b32`, required as `github.com/syncthing/syncthing v1.30.0-rc.1.0.20261020195438-d6d0181f7d46` with Syncthing's two `replace` directives copied. Build tag `noassets`.
 - Go 1.26.2 (Syncthing's minimum, fetched through `GOTOOLCHAIN=auto`), `linux/amd64`, 16 cores.
 - The "phone" embeds `lib/syncthing` in the test process and is driven over REST and `/rest/events`. The "computer" is the same binary re-run as a child process. Both use temporary homes, static `tcp://127.0.0.1` addresses, and have discovery, relays, NAT, usage and crash reporting, and upgrades turned off. The phone folder is receive-only, created paused, set to `*`, then unpaused.
-- `bash dev/test-engine.sh` runs the suite in a network namespace that has only loopback. Default suite: 29 tests; three consecutive runs all passed (exit 0, 272 to 278 s each). Heavy runs: 50 and 150 start/stop cycles, and 100,000 remote files with up to 5,000 lines.
+- `bash dev/test-engine.sh` runs the suite in a network namespace that has only loopback. Default suite: 31 tests including the two gate tests; the last two consecutive runs passed (exit 0, 353 and 360 s). Heavy runs: 50 and 150 start/stop cycles, and 100,000 remote files with up to 5,000 lines.
 - Timings are from one machine. Treat them as orders of magnitude, not as phone numbers.
 - "Read in source" marks statements taken from Syncthing's code at the pin rather than measured.
 
@@ -84,11 +84,15 @@ Database size is the bigger surprise. With nothing selected, the phone's home (S
 - Escaping rule: backslash-escape `\ * ? [ ] { }`, always root the line with `/` (so `#`, `!` and `(?i)` in names are never read as syntax), and write trailing whitespace as one-character classes such as `[ ]`, because Syncthing trims every line. "Whitespace" is Go's `unicode.IsSpace` set, which `strings.TrimSpace` uses; a Kotlin port must use that set too (`Char.isWhitespace` misses U+0085). Names with a newline cannot be written; the helper rejects them. A selected path inside an excluded path is rejected with an error rather than silently dropped.
 - NFD: a Linux computer with `autoNormalize` (the default) renamed an NFD file to NFC on its disk and indexed it as NFC. Syncthing also NFC-normalizes the patterns, so NFC and NFD lines both match. A real Mac peer was not tested.
 
+## Download gate
+
+A stock way to hold downloads while the index stays fresh was found after the questions above: set the folder's `minDiskFree` out of reach (for example `1000000 TB`) while the UI runs Syncthing, and to a real value only inside the download job. `TestDownloadGate` and `TestDownloadGateMidTransfer` (`engine/gate_test.go`, part of the default suite) assert that the closed gate holds an armed selection, a new version of an on-device file, a new file in a selected directory, a restart with a known update in either start order, and an unrelated folder config change. Under `*` the phone stays idle and the computer sees it at 100%. Closing the gate again causes no re-hash, `needBytes` equals the pending selected bytes, and held files show as pull errors ("insufficient space" with a peer that has the file connected, "not available" otherwise; the app must treat both as held). The gate fails open if the free-space query errors, so `statfs` on Android app storage needs a device check. Deletions, renames, new directories and symlinks, and metadata-only changes still pass the closed gate, and which network a download job's transfer uses is an open bridge question. Opening downloads within about 0.06 to 0.16 s (logged). Closing mid-transfer still lets already-requested data arrive and be discarded, up to the 32 MiB request window (31.9 MiB measured); stopping Syncthing ends the transfer with no tail. Details, costs and the comparison with a patch are in [sync-download-gate.md](sync-download-gate.md). This changes the b) verdicts below: the Sync-button conflict has a stock answer, which is still a product decision.
+
 ## Against the design documents
 
 | Statement | Source | Verdict |
 |---|---|---|
-| "App visible: Syncthing runs ... Nothing is downloaded" | flows.md | Contradicted by b): armed content downloads within about 1.3 s. Large `pullerDelayS` plus `pullerPauseS` held the tested cases but is not a proven workaround (see b)). |
+| "App visible: Syncthing runs ... Nothing is downloaded" | flows.md | Contradicted by b) on default settings: armed content downloads within about 1.3 s. Large `pullerDelayS` plus `pullerPauseS` is not a proven workaround; the `minDiskFree` gate (Download gate section) held every tested case. |
 | "The sync network setting limits only the Sync button" | flows.md | Contradicted for the same reason. |
 | Flow 6 "Nothing else that is selected is downloaded" | flows.md | Contradicted whenever other files are armed. |
 | Flow 4 "copy is deleted at once" | flows.md | Holds only after the ignore change has been scanned (about one scan, milliseconds to seconds); see c). |
