@@ -3,7 +3,7 @@
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 failed=()
-for check in check-secrets check-repo lint-workflows; do
+for check in check-secrets check-repo lint-workflows check-android; do
   printf '== %s\n' "$check"
   bash "dev/$check.sh" || failed+=("$check")
 done

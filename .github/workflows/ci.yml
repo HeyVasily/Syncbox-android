@@ -1,13 +1,20 @@
 name: CI
 
+# Pull requests are checked once, by the pull_request run. Pushes are checked on master only.
 on:
   push:
     branches:
-      - '**'
+      - master
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+# A new push to a pull request replaces its running check. Every push to master is checked.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   secrets:
@@ -40,3 +47,51 @@ jobs:
           persist-credentials: false
       - name: Lint workflows and shell scripts
         run: bash dev/lint-workflows.sh
+
+  # Every step after the checkout is skipped until the Gradle project exists.
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate the Gradle wrapper
+        if: hashFiles('gradlew') != ''
+        uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+      - name: Set up JDK
+        if: hashFiles('gradlew') != ''
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Gradle
+        if: hashFiles('gradlew') != ''
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+      - name: Lint, unit tests, debug build and 16 KB checks
+        run: bash dev/check-android.sh
+      - name: Keep reports of a failed build
+        if: failure() && hashFiles('gradlew') != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-reports-${{ github.run_attempt }}
+          path: |
+            **/build/reports/
+            **/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Fails a pull request that adds a dependency with a known vulnerability, for the ecosystems
+  # GitHub reads from the repository (Go modules, Actions). Gradle is covered by the OSV audit.
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          fail-on-scopes: runtime, development, unknown
