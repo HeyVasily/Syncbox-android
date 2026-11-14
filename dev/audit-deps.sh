@@ -16,4 +16,11 @@ args=()
 for manifest in "${manifests[@]}"; do
   args+=(--lockfile "$manifest")
 done
-"$scanner" scan source "${args[@]}"
+status=0
+"$scanner" scan source "${args[@]}" || status=$?
+# 128: the manifests list no packages, for example a go.mod without requirements.
+if [ "$status" -eq 128 ]; then
+  printf 'the manifests list no packages: nothing to audit\n'
+  exit 0
+fi
+exit "$status"

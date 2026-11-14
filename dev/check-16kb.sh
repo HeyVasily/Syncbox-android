@@ -15,7 +15,9 @@ fi
 sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 [ -n "$sdk" ] || { printf 'check-16kb: ANDROID_HOME is not set\n' >&2; exit 1; }
 # zipalign understands -P since Build Tools 35.
-zipalign="$(find "$sdk/build-tools" -mindepth 2 -maxdepth 2 -name zipalign | sort -V | tail -n 1)"
+# Prefer a stable Build Tools release over a preview such as 37.0.0-rc2.
+zipalign="$(find "$sdk/build-tools" -mindepth 2 -maxdepth 2 -name zipalign | sort -V |
+  { grep -v -- '-rc' || true; } | tail -n 1)"
 [ -n "$zipalign" ] || { printf 'check-16kb: no zipalign under %s/build-tools\n' "$sdk" >&2; exit 1; }
 status=0
 for apk in "${apks[@]}"; do
@@ -37,24 +39,27 @@ with zipfile.ZipFile(apk) as z:
         checked += 1
         data = z.read(name)
         problems = []
-        if data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
+        if data[:6] != b"\x7fELF\x02\x01":
             problems.append("not a little-endian 64-bit ELF file")
         else:
-            phoff, = struct.unpack_from("<Q", data, 0x20)
-            phentsize, phnum = struct.unpack_from("<HH", data, 0x36)
-            loads = 0
-            for i in range(phnum):
-                p_type, _, offset, vaddr, _, _, _, align = struct.unpack_from(
-                    "<IIQQQQQQ", data, phoff + i * phentsize)
-                if p_type != 1:
-                    continue
-                loads += 1
-                if align < PAGE or align % PAGE:
-                    problems.append(f"LOAD {loads} is aligned to {align:#x}, need a multiple of 0x4000")
-                elif offset % PAGE != vaddr % PAGE:
-                    problems.append(f"LOAD {loads} offset {offset:#x} and address {vaddr:#x} differ modulo 0x4000")
-            if not loads:
-                problems.append("no LOAD segment")
+            try:
+                phoff, = struct.unpack_from("<Q", data, 0x20)
+                phentsize, phnum = struct.unpack_from("<HH", data, 0x36)
+                loads = 0
+                for i in range(phnum):
+                    p_type, _, offset, vaddr, _, _, _, align = struct.unpack_from(
+                        "<IIQQQQQQ", data, phoff + i * phentsize)
+                    if p_type != 1:
+                        continue
+                    loads += 1
+                    if align < PAGE or align % PAGE:
+                        problems.append(f"LOAD {loads} is aligned to {align:#x}, need a multiple of 0x4000")
+                    elif offset % PAGE != vaddr % PAGE:
+                        problems.append(f"LOAD {loads} offset {offset:#x} and address {vaddr:#x} differ modulo 0x4000")
+                if not loads:
+                    problems.append("no LOAD segment")
+            except (struct.error, IndexError):
+                problems.append("truncated or malformed ELF file")
         for problem in problems:
             print(f"::error file={apk}::{name}: {problem}")
         bad += bool(problems)

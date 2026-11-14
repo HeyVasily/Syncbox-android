@@ -1,10 +1,21 @@
 name: Dependency audit
 
-# New advisories appear without any change in the repository, so this also runs on a schedule.
+# Runs when a dependency manifest changes, in a pull request or on master. New advisories appear
+# without any change in the repository, so it also runs on a schedule.
 on:
   schedule:
     - cron: '23 5 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '**/go.mod'
+      - '**/gradle.lockfile'
+      - '**/buildscript-gradle.lockfile'
+      - 'gradle/verification-metadata.xml'
+      - 'osv-scanner.toml'
+      - 'dev/audit-deps.sh'
+      - 'dev/pinned-tool.sh'
+      - '.github/workflows/dependency-audit.yml'
   push:
     branches:
       - master
@@ -13,6 +24,7 @@ on:
       - '**/gradle.lockfile'
       - '**/buildscript-gradle.lockfile'
       - 'gradle/verification-metadata.xml'
+      - 'osv-scanner.toml'
       - 'dev/audit-deps.sh'
       - 'dev/pinned-tool.sh'
       - '.github/workflows/dependency-audit.yml'

@@ -11,9 +11,10 @@ on:
 permissions:
   contents: read
 
+# A new push to a pull request replaces its running check. Every push to master is checked.
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   secrets:
@@ -80,7 +81,8 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # Fails a pull request that adds a dependency with a known vulnerability.
+  # Fails a pull request that adds a dependency with a known vulnerability, for the ecosystems
+  # GitHub reads from the repository (Go modules, Actions). Gradle is covered by the OSV audit.
   dependency-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
@@ -92,3 +94,4 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: moderate
+          fail-on-scopes: runtime, development, unknown

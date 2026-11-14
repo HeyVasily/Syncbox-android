@@ -25,19 +25,24 @@ done
 
 # Dependency protections must be switched on in the same change that adds the build files.
 has() { [ -f "$1" ] && grep -qE -- "$2" "$1"; }
+dependabot() {
+  has .github/dependabot.yml "^[[:space:]]*-?[[:space:]]*package-ecosystem:[[:space:]]*[\"']?$1[\"']?[[:space:]]*(#.*)?\$" ||
+    fail .github/dependabot.yml "Dependabot must cover the $1 ecosystem"
+}
 listing="$(printf '%s\n' "${files[@]}")"
 tracked() { grep -qE -- "$1" <<< "$listing"; }
-if tracked '(^|/)gradlew$'; then
+if tracked '/gradlew$'; then
+  fail gradlew "the Gradle wrapper must be in the repository root"
+fi
+if tracked '^gradlew$'; then
   has gradle/wrapper/gradle-wrapper.properties '^distributionSha256Sum=' ||
     fail gradle/wrapper/gradle-wrapper.properties "the Gradle wrapper must pin distributionSha256Sum"
   has gradle/verification-metadata.xml '<verify-metadata>true</verify-metadata>' ||
     fail gradle/verification-metadata.xml "Gradle dependency verification must be on"
-  has .github/dependabot.yml 'package-ecosystem: "?gradle"?$' ||
-    fail .github/dependabot.yml "Dependabot must cover the gradle ecosystem"
+  dependabot gradle
 fi
 if tracked '(^|/)go\.mod$'; then
-  has .github/dependabot.yml 'package-ecosystem: "?gomod"?$' ||
-    fail .github/dependabot.yml "Dependabot must cover the gomod ecosystem"
+  dependabot gomod
 fi
 
 # Text checks: English only, and no paths from the development machine.

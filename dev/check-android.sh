@@ -9,6 +9,8 @@ if [ ! -f gradlew ]; then
 fi
 status=0
 # --continue runs every task that can still run, so one failure does not hide the others.
-bash gradlew --no-daemon --continue --stacktrace lint testDebugUnitTest assembleDebug || status=1
+# Strict verification overrides a lenient or off setting in gradle.properties.
+bash gradlew --no-daemon --continue --stacktrace --dependency-verification strict \
+  lint testDebugUnitTest assembleDebug || status=1
 bash dev/check-16kb.sh || status=1
 exit "$status"
