@@ -16,8 +16,9 @@ sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 [ -n "$sdk" ] || { printf 'check-16kb: ANDROID_HOME is not set\n' >&2; exit 1; }
 # zipalign understands -P since Build Tools 35.
 # Prefer a stable Build Tools release over a preview such as 37.0.0-rc2.
-zipalign="$(find "$sdk/build-tools" -mindepth 2 -maxdepth 2 -name zipalign | sort -V |
-  { grep -v -- '-rc' || true; } | tail -n 1)"
+all="$(find "$sdk/build-tools" -mindepth 2 -maxdepth 2 -name zipalign | sort -V)"
+zipalign="$(grep -v -- '/build-tools/[^/]*-rc[^/]*/zipalign$' <<< "$all" | tail -n 1 || true)"
+[ -n "$zipalign" ] || zipalign="$(tail -n 1 <<< "$all")"
 [ -n "$zipalign" ] || { printf 'check-16kb: no zipalign under %s/build-tools\n' "$sdk" >&2; exit 1; }
 status=0
 for apk in "${apks[@]}"; do

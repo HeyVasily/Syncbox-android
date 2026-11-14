@@ -18,7 +18,8 @@ for f in "${files[@]}"; do
     *.apk|*.aab|*.apks)
       fail "$f" "build outputs must not be in the repository" ;;
   esac
-  if [ "$(stat -c %s "$f")" -gt 1048576 ]; then
+  # The Gradle verification file is required below and grows with the dependency tree.
+  if [ "$f" != gradle/verification-metadata.xml ] && [ "$(stat -c %s "$f")" -gt 1048576 ]; then
     fail "$f" "file is larger than 1 MiB"
   fi
 done

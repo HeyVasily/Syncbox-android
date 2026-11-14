@@ -12,7 +12,11 @@ if [ "${#manifests[@]}" -eq 0 ]; then
   exit 0
 fi
 scanner="$(bash dev/pinned-tool.sh osv-scanner)"
-args=()
+# Call analysis needs the Go toolchain and code that compiles, and fails the scan when it cannot
+# run. Without it every advisory for a listed module version is reported.
+args=(--no-call-analysis=go)
+# Without --config the scanner looks for osv-scanner.toml next to each manifest, not in the root.
+[ -f osv-scanner.toml ] && args+=(--config osv-scanner.toml)
 for manifest in "${manifests[@]}"; do
   args+=(--lockfile "$manifest")
 done

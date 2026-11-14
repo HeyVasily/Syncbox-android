@@ -5,7 +5,7 @@ The repository is public. `.github/workflows/ci.yml` runs on every pull request 
 | Check | Script | What it catches |
 |---|---|---|
 | Secrets | `dev/check-secrets.sh` | gitleaks over the full git history and the uncommitted working tree |
-| Repository rules | `dev/check-repo.sh` | signing keys, `local.properties` and similar files, APK/AAB files, files over 1 MiB, Cyrillic text, development machine paths, missing dependency protections (below) |
+| Repository rules | `dev/check-repo.sh` | signing keys, `local.properties` and similar files, APK/AAB files, files over 1 MiB (except `gradle/verification-metadata.xml`), Cyrillic text, development machine paths, missing dependency protections (below) |
 | Workflows | `dev/lint-workflows.sh` | actionlint, zizmor and ShellCheck |
 | Android | `dev/check-android.sh` | Android Lint, unit tests, a debug build, then `dev/check-16kb.sh` on the built APKs |
 
@@ -20,7 +20,7 @@ Tools are official release binaries pinned by version and SHA-256 in `dev/pinned
 ## Dependencies
 
 - **Updates:** Dependabot, configured in `.github/dependabot.yml`.
-- **Known vulnerabilities:** `.github/workflows/dependency-audit.yml` runs `dev/audit-deps.sh` every day, and when a dependency manifest changes in a pull request or on `master`. It checks `go.mod`, Gradle lockfiles and `gradle/verification-metadata.xml` against the OSV database. Gradle dependencies are covered through the verification file, which every dependency change has to update. It is not part of `dev/check.sh`, because it needs the network and its result changes without any change in the repository. To accept an advisory, list it with a reason in `osv-scanner.toml`.
+- **Known vulnerabilities:** `.github/workflows/dependency-audit.yml` runs `dev/audit-deps.sh` every day, and when a dependency manifest changes in a pull request or on `master`. It checks `go.mod`, Gradle lockfiles and `gradle/verification-metadata.xml` against the OSV database. Gradle dependencies are covered through the verification file, which every dependency change has to update. It is not part of `dev/check.sh`, because it needs the network and its result changes without any change in the repository. To accept an advisory, list it with a reason in `osv-scanner.toml` in the repository root. GitHub disables scheduled workflows in a public repository after 60 days without activity, and they have to be enabled again by hand.
 - **Pull requests, second check:** the `dependency-review` job fails a pull request that adds a dependency with a known vulnerability of moderate or higher severity, in any scope. It sees only what GitHub reads from the repository itself: Go modules and Actions, not Gradle.
 - **Protections that cannot be forgotten:** `dev/check-repo.sh` fails when `gradlew` exists without a pinned wrapper checksum (`distributionSha256Sum`), without Gradle dependency verification (`gradle/verification-metadata.xml`), without the `gradle` ecosystem in Dependabot, or outside the repository root. `dev/check-android.sh` builds with `--dependency-verification strict`, so `gradle.properties` cannot weaken verification. It also fails when a `go.mod` exists without the `gomod` ecosystem in Dependabot.
 
