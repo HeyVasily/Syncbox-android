@@ -32,7 +32,7 @@ All decided on 2026-11-02.
 
 ## Open questions
 
-- **App name:** to be discussed. See the `decide-app-name` task.
+- **App name:** "Avoska" is chosen, with the repository to become `avoska-android`; the name is not yet checked against stores and trademark registers, and the `applicationId` is open. See the `rename-to-avoska` task.
 - **Background sync design:** to be discussed after the first release. See the `background-sync-design` task.
 - **Verification setup:** how an agent reproduces and checks everything. See the `verification-setup` task.
 - **App design:** to be developed together. See the `app-design` task.
