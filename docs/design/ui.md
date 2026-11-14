@@ -1,6 +1,6 @@
 # Visual style and control layout
 
-Status: chosen by the user on 2026-11-14, final mockups not yet approved.
+Status: approved by the user on 2026-11-14.
 
 ## Mockups
 
