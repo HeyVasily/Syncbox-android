@@ -31,6 +31,7 @@ Run `bash dev/screenshots.sh` (or `bash dev/screenshots.sh <scene>...` for some 
 ## Differences from the mockups
 
 - Sizes and counts are computed from the demo data instead of copied from the mockups. The On device tab and Storage show 18.5 GB (the mockups say 17.3 GB), because the outdated local copy and all eight episodes inside Series count. "6.8 GB to download", "2.3 of 6.8 GB" and "34%" match.
+- Folder rows show the size of their selected content, as flows.md says, not the full content size as in the mockup: Series reads "14.2 GB · On device", and Courses, with nothing selected, reads "Not selected" (the mockup: "8.4 GB"). A partly selected folder would read "2.9 GB selected".
 - Rows are sorted: folders first, then by the chosen order. The mockups list Series before Courses and the files in no particular order.
 - The On device tab lists every kept file across subfolders, so it shows Episode 01 to 08 where the mockup shows two.
 - The waiting step of pairing, which the mockups describe only in text, shows the start of the device ID, "Waiting for the device", a spinner and the hint from flow 1.

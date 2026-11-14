@@ -4,6 +4,7 @@ import app.avoska.Preferences
 import app.avoska.SyncNetwork
 import app.avoska.engine.DemoData
 import app.avoska.engine.DemoSyncEngine
+import app.avoska.engine.EntryState
 import app.avoska.engine.FileRef
 import app.avoska.engine.MB
 import app.avoska.ui.Screen
@@ -50,6 +51,23 @@ class FilesModelTest {
         engine.startSync()
         val downloading = rootRows().single { it.entry.name == "Family archive 1998.mkv" }
         assertEquals(listOf(MenuAction.DETAILS), downloading.menuActions)
+    }
+
+    @Test
+    fun folderRowsShowTheirSelectedContent() {
+        fun label(name: String) = sizeLabel(rootRows().single { it.entry.name == name }.entry)
+        assertEquals(SizeLabel.Size(14_200 * MB), label("Series"))
+        assertEquals(SizeLabel.NotSelected, label("Courses"))
+        // Files show their own size whether selected or not.
+        assertEquals(SizeLabel.Size(12_800 * MB), label("Drone footage raw.mov"))
+
+        engine.setKeep(FileRef(DemoData.FOLDER_ID, "Courses/Kotlin basics.mp4"), true)
+        assertEquals(SizeLabel.Selected(2_900 * MB), label("Courses"))
+
+        // Fully selected but not downloaded yet: the selected size with "Waiting for sync".
+        engine.setKeep(FileRef(DemoData.FOLDER_ID, "Courses"), true)
+        assertEquals(SizeLabel.Size(8_400 * MB), label("Courses"))
+        assertEquals(EntryState.Waiting(queued = false), rootRows().single { it.entry.name == "Courses" }.entry.state)
     }
 
     @Test

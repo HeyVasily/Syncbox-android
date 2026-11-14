@@ -4,7 +4,6 @@ plugins {
 }
 
 android {
-    // Provisional: the applicationId is not decided yet (see the rename-to-avoska task).
     namespace = "app.avoska"
     compileSdk = 36
 

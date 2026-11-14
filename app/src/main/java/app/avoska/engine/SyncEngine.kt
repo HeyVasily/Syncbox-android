@@ -70,7 +70,7 @@ sealed interface EntryState {
 data class Entry(
     val ref: FileRef,
     val kind: FileKind,
-    /** Folders: total size of their content. */
+    /** Files: their size. Folders: the size of their selected content (flow 3), 0 when nothing is selected. */
     val sizeBytes: Long,
     val modifiedMillis: Long,
     /** The keep switch: for a folder, true when everything inside is selected. */
