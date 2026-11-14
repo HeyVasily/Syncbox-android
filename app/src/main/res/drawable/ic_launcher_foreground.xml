@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A string bag: two handles over a net. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M42,46 C42,34 66,34 66,46 M36,46 L72,46 L68,76 Q67,80 63,80 L45,80 Q41,80 40,76 Z M38,56 L70,56 M39,66 L69,66 M48,46 L50,80 M60,46 L58,80"
+        android:strokeWidth="3.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
