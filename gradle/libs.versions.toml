@@ -9,7 +9,7 @@ navigation3 = "1.2.1"
 qrcodegen = "1.8.0"
 junit = "4.13.2"
 # Matches the kotlinx-coroutines version that AndroidX resolves to.
-coroutines = "1.9.0"
+coroutines = "1.11.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
