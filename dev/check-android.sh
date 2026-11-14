@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Android build checks: Lint, unit tests, a debug build, then the 16 KB checks on the built APKs.
+# Runs every step and reports each failure. Does nothing until the Gradle project exists.
+set -uo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
+if [ ! -f gradlew ]; then
+  printf 'no Gradle project yet: Android checks skipped\n'
+  exit 0
+fi
+status=0
+# --continue runs every task that can still run, so one failure does not hide the others.
+bash gradlew --no-daemon --continue --stacktrace lint testDebugUnitTest assembleDebug || status=1
+bash dev/check-16kb.sh || status=1
+exit "$status"

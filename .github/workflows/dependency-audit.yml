@@ -1,0 +1,32 @@
+name: Dependency audit
+
+# New advisories appear without any change in the repository, so this also runs on a schedule.
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/go.mod'
+      - '**/gradle.lockfile'
+      - '**/buildscript-gradle.lockfile'
+      - 'gradle/verification-metadata.xml'
+      - 'dev/audit-deps.sh'
+      - 'dev/pinned-tool.sh'
+      - '.github/workflows/dependency-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  osv:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Audit dependencies against the OSV database
+        run: bash dev/audit-deps.sh

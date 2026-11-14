@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Public repository rules for tracked and untracked files. Reports every violation.
+# Public repository rules and dependency protections for tracked and untracked files.
+# Reports every violation.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -21,6 +22,23 @@ for f in "${files[@]}"; do
     fail "$f" "file is larger than 1 MiB"
   fi
 done
+
+# Dependency protections must be switched on in the same change that adds the build files.
+has() { [ -f "$1" ] && grep -qE -- "$2" "$1"; }
+listing="$(printf '%s\n' "${files[@]}")"
+tracked() { grep -qE -- "$1" <<< "$listing"; }
+if tracked '(^|/)gradlew$'; then
+  has gradle/wrapper/gradle-wrapper.properties '^distributionSha256Sum=' ||
+    fail gradle/wrapper/gradle-wrapper.properties "the Gradle wrapper must pin distributionSha256Sum"
+  has gradle/verification-metadata.xml '<verify-metadata>true</verify-metadata>' ||
+    fail gradle/verification-metadata.xml "Gradle dependency verification must be on"
+  has .github/dependabot.yml 'package-ecosystem: "?gradle"?$' ||
+    fail .github/dependabot.yml "Dependabot must cover the gradle ecosystem"
+fi
+if tracked '(^|/)go\.mod$'; then
+  has .github/dependabot.yml 'package-ecosystem: "?gomod"?$' ||
+    fail .github/dependabot.yml "Dependabot must cover the gomod ecosystem"
+fi
 
 # Text checks: English only, and no paths from the development machine.
 while IFS= read -r hit; do

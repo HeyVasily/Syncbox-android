@@ -2,7 +2,7 @@
 # Official release binaries, verified by SHA-256 and cached in .build/tools.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks}"
+name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks|osv-scanner}"
 case "$(uname -sm)" in
   'Linux x86_64') arch=amd64; triple=x86_64-unknown-linux-gnu ;;
   'Linux aarch64') arch=arm64; triple=aarch64-unknown-linux-gnu ;;
@@ -40,6 +40,16 @@ case "$name" in
     url="https://github.com/gitleaks/gitleaks/releases/download/v$version/gitleaks_${version}_linux_$garch.tar.gz"
     member=gitleaks
     ;;
+  osv-scanner)
+    version=2.7.0
+    # https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_SHA256SUMS
+    case "$arch" in
+      amd64) checksum=160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b ;;
+      arm64) checksum=4061ef4c021ed3c47f203b818f337e351336cc5cd67c0274fc36bd1dfc728dd7 ;;
+    esac
+    url="https://github.com/google/osv-scanner/releases/download/v$version/osv-scanner_linux_$arch"
+    member=archive
+    ;;
   *) printf 'unknown pinned tool: %s\n' "$name" >&2; exit 1 ;;
 esac
 tools="$ROOT/.build/tools"
@@ -62,6 +72,7 @@ case "$name" in
   actionlint) actual="$("$tool" -version)"; expected="$version" ;;
   zizmor) actual="$("$tool" --version)"; expected="zizmor $version" ;;
   gitleaks) actual="$("$tool" version)"; expected="$version" ;;
+  osv-scanner) actual="$("$tool" --version)"; expected="osv-scanner version: $version" ;;
 esac
 [ "${actual%%$'\n'*}" = "$expected" ] || { printf 'unexpected %s version\n' "$name" >&2; exit 1; }
 printf '%s\n' "$tool"
