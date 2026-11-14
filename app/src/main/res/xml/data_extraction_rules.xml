@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Nothing is backed up or transferred yet; backup rules come with real app data. -->
+<!-- Nothing is backed up or transferred. files/ holds Syncthing's identity (its private key),
+     config and database, the synced folders and the selection: none of it may leave the device.
+     allowBackup="false" in the manifest covers older backup paths. -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" path="." />

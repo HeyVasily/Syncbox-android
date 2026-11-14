@@ -177,6 +177,9 @@ class DemoSyncEngine(
         if (!offline && state.value.connecting) scheduleConnect(CONNECT_DELAY_MILLIS)
     }
 
+    /** The demo has no Syncthing to start or stop. */
+    override fun setAppVisible(visible: Boolean) = Unit
+
     override fun addDevice(deviceId: String) {
         mutate { s ->
             if (s.devices.any { it.id == deviceId }) s else s.copy(devices = s.devices + Device(deviceId, null, connected = false))

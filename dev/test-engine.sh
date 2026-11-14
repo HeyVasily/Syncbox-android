@@ -21,8 +21,9 @@ cd "$ROOT/engine"
 go vet ./...
 go vet -tags noassets ./...
 go test -c -tags noassets -o "$OUT/engine.test" .
+go test -c -tags noassets -o "$OUT/bridge.test" ./bridge
 
-run=("$OUT/engine.test" -test.v -test.count=1 -test.timeout=60m "$@")
+wrap=()
 # The namespace needs unshare (unprivileged user namespaces) and ip (to bring
 # up loopback inside it). Without either, fall back and say so.
 if [ "${ENGINE_NETNS:-1}" = 0 ]; then
@@ -34,11 +35,15 @@ elif ! unshare -rn ip link set lo up 2>/dev/null; then
 else
   printf 'running in a loopback-only network namespace\n'
   # shellcheck disable=SC2016 # expanded by the inner shell
-  run=(unshare -rn sh -c 'ip link set lo up && exec "$@"' sh "${run[@]}")
+  wrap=(unshare -rn sh -c 'ip link set lo up && exec "$@"' sh)
 fi
 
 start=$(date +%s)
 status=0
-"${run[@]}" 2>&1 | sed -u -e '/^=== \(RUN\|PAUSE\|CONT\)/d' | tee "$OUT/test.log" || status=$?
+# The bridge's start/stop test first (a few seconds), then the behaviour suite.
+{
+  (cd bridge && "${wrap[@]}" "$OUT/bridge.test" -test.v -test.count=1 -test.timeout=5m) || exit 1
+  "${wrap[@]}" "$OUT/engine.test" -test.v -test.count=1 -test.timeout=60m "$@"
+} 2>&1 | sed -u -e '/^=== \(RUN\|PAUSE\|CONT\)/d' | tee "$OUT/test.log" || status=$?
 printf 'engine tests: exit %d after %ds (log: .build/engine/test.log)\n' "$status" "$(( $(date +%s) - start ))"
 exit "$status"

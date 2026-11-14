@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Everything the screens need from Syncthing. The demo engine implements it in memory; the real
- * engine (gomobile bridge plus REST) will implement the same interface later.
+ * Everything the screens need from Syncthing. [RestSyncEngine] is the real one (gomobile bridge
+ * plus REST); [DemoSyncEngine] implements it in memory for tests and debug screenshot scenes.
  *
  * [status] is small and changes often. File lists are queried per folder level, so no caller ever
  * holds the whole tree. Every file reference carries its folder ID.
@@ -39,6 +39,12 @@ interface SyncEngine {
 
     /** Offline mode: when true the engine does not connect and uses no network. */
     fun setOffline(offline: Boolean)
+
+    /**
+     * Whether the app is on screen. Outside a download job Syncthing runs only while it is, and
+     * offline mode is off; it stops when the app leaves the screen.
+     */
+    fun setAppVisible(visible: Boolean)
 
     /** Flow 1: adds a device by a validated ID and waits for it to connect. */
     fun addDevice(deviceId: String)
@@ -97,6 +103,9 @@ sealed interface Connection {
     data object NoDevice : Connection
     /** Offline mode: the engine does not connect. */
     data object Disabled : Connection
+
+    /** Syncthing could not start, or stopped by itself; [reason] is for logs, not for users. */
+    data class Failed(val reason: String) : Connection
 }
 
 enum class SyncKind { SYNC, SINGLE_DOWNLOAD }
@@ -127,6 +136,8 @@ data class EngineStatus(
     /** Bytes of local copies, current or outdated, in all folders. */
     val onDeviceBytes: Long,
     val freeBytes: Long,
+    /** False while this build cannot download at all: the real engine before download jobs exist. */
+    val downloadsAvailable: Boolean = true,
 ) {
-    val canDownload: Boolean get() = connection is Connection.Online
+    val canDownload: Boolean get() = downloadsAvailable && connection is Connection.Online
 }

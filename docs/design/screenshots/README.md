@@ -19,6 +19,15 @@ Screenshots of the demo app on the emulator, one per screen and state, in the li
 
 The system notification in `first-launch.html` is not built yet.
 
+## Real engine
+
+Taken by `bash dev/e2e-emulator.sh --screenshots` ([verification.md](../../verification.md)): the debug app with Syncthing running in-process, paired with a peer on the host that shares the folder "Test media". Nothing is downloaded, so no file is on the device and Sync is disabled with the reason. The peer's device ID is new on every run.
+
+| Screen or state | Light | Dark |
+|---|---|---|
+| Folder offer from the peer, first launch | `real-folder-offer-light.png` | `real-folder-offer-dark.png` |
+| Files with the peer's list | `real-files-light.png` | `real-files-dark.png` |
+
 ## How they were taken
 
 Run `bash dev/screenshots.sh` (or `bash dev/screenshots.sh <scene>...` for some of them). It builds the debug APK, leases an emulator from `android-broker`, opens each scene in the light and the dark theme, and saves the PNGs here at 540 x 960 with an 8-bit palette. It needs ImageMagick.
