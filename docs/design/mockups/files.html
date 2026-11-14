@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Files: all files, on device, syncing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<style>
+body{margin:0}
+.light{--bg:#F7F9FC;--bar:#E6ECF8;--card:#FFFFFF;--tx:#1A1C20;--dim:#5A5F6B;--pri:#2B5FC7;--onpri:#FFFFFF;--ok:#1E6B3F;--warn:#8F4400;--out:#747A86;--off:#E1E4EC;--line:#DDE2EC;--pbg:#C9D3E8;--sel:#D9E4FB}
+.dark{--bg:#111318;--bar:#1E222B;--card:#1B1F27;--tx:#E3E5EA;--dim:#A4AAB6;--pri:#A9C4FF;--onpri:#0B2B66;--ok:#7FD6A0;--warn:#FFB877;--out:#8D93A0;--off:#2A2F39;--line:#2A2F39;--pbg:#2F3644;--sel:#243352}
+.row3{display:flex;gap:40px}
+.col{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:14px;line-height:20px;font-weight:500;color:#3B4048}
+.ph{width:390px;height:844px;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg);color:var(--tx);font-size:16px;line-height:22px}
+.ph button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.ic{width:24px;height:24px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ph .ib{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.top{display:flex;align-items:center;gap:4px;padding:12px 4px 4px 4px}
+.ttl{flex:1;min-width:0;font-size:22px;line-height:28px}
+.sub{font-size:13px;line-height:18px;color:var(--dim)}
+.ph .ok{color:var(--ok)}.ph .wn{color:var(--warn)}.ph .pr{color:var(--pri)}
+.r{min-height:60px;display:flex;align-items:center;gap:12px;padding:0 0 0 16px}
+.g{flex:1;min-width:0}
+.ph .sw{width:52px;height:32px;box-sizing:border-box;border-radius:16px;display:flex;align-items:center;flex-shrink:0;position:relative}
+.sw::after{content:"";position:absolute;inset:-8px 0}
+.ph .sw.on{background:var(--pri);justify-content:flex-end;padding:4px}
+.sw.on i{width:24px;height:24px;border-radius:12px;background:var(--onpri)}
+.ph .sw.off{background:var(--off);border:2px solid var(--out);padding:6px}
+.sw.off i{width:16px;height:16px;border-radius:8px;background:var(--out)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.ph .tabs button{flex:1;height:48px;font-size:14px;font-weight:500;color:var(--dim);box-sizing:border-box;border-bottom:3px solid transparent}
+.ph .tabs .on{color:var(--pri);border-bottom-color:var(--pri)}
+.ph .bt{height:48px;padding:0 24px;border-radius:24px;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0}
+.ph .bt.f{background:var(--pri);color:var(--onpri)}
+.ph .bt.o{border:1px solid var(--out);color:var(--pri)}
+.bar{display:flex;align-items:center;gap:12px;padding:16px 16px 24px 20px;background:var(--bar);border-radius:24px 24px 0 0}
+.pg{height:6px;border-radius:3px;background:var(--pbg)}
+.pg i{display:block;height:6px;border-radius:3px;background:var(--pri)}
+.ph .chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--out);font-size:14px;display:flex;align-items:center;gap:6px;position:relative}
+.chip::after{content:"";position:absolute;inset:-6px 0}
+.ph .chip.on{background:var(--sel);border-color:var(--sel)}
+.fl{flex:1}
+</style>
+</head>
+<body>
+<div style="width: 1300px; height: 1840px; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 40px; background: #ECEEF2; font-family: Roboto, system-ui, sans-serif">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="video" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+<symbol id="doc" viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3v5h5"/></symbol>
+<symbol id="more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
+</defs></svg>
+<div class="light row3">
+
+<div class="col"><div class="cap">All files · light</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button class="on">All files</button><button>On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Series</div><div class="sub">14.2 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Series on device"><i></i></button><button class="ib" aria-label="Actions for Series"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Courses</div><div class="sub">8.4 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Courses on device"><i></i></button><button class="ib" aria-label="Actions for Courses"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Family archive 1998.mkv</div><div class="sub">5.6 GB · <span class="pr">Waiting for sync</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Family archive on device"><i></i></button><button class="ib" aria-label="Actions for Family archive"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · <span class="wn">On device, outdated</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Drone footage raw.mov</div><div class="sub">12.8 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Drone footage on device"><i></i></button><button class="ib" aria-label="Actions for Drone footage"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar"><div class="g"><div style="font-weight: 500">6.8 GB to download</div><div class="sub">41 GB free on device</div></div><button class="bt f">Sync</button></div>
+</div></div>
+
+<div class="col"><div class="cap">On device tab · light</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button>All files</button><button class="on">On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · Movies</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · Movies · <span class="wn">Outdated</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Episode 01.mkv</div><div class="sub">1.8 GB · Movies / Series</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Episode 01 on device"><i></i></button><button class="ib" aria-label="Actions for Episode 01"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Episode 02.mkv</div><div class="sub">1.7 GB · Movies / Series</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Episode 02 on device"><i></i></button><button class="ib" aria-label="Actions for Episode 02"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · Movies</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar"><div class="g"><div style="font-weight: 500">6.8 GB to download</div><div class="sub">41 GB free on device</div></div><button class="bt f">Sync</button></div>
+</div></div>
+
+<div class="col"><div class="cap">Syncing · light</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button class="on">All files</button><button>On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Series</div><div class="sub">14.2 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Series on device"><i></i></button><button class="ib" aria-label="Actions for Series"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Courses</div><div class="sub">8.4 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Courses on device"><i></i></button><button class="ib" aria-label="Actions for Courses"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g" style="display: flex; flex-direction: column; gap: 4px"><div>Family archive 1998.mkv</div><div class="pg" style="height: 4px"><i style="width: 41%; height: 4px"></i></div><div class="sub pr">2.3 of 5.6 GB</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Family archive on device"><i></i></button><button class="ib" aria-label="Actions for Family archive"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · <span class="pr">Waiting</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Drone footage raw.mov</div><div class="sub">12.8 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Drone footage on device"><i></i></button><button class="ib" aria-label="Actions for Drone footage"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar" style="flex-direction: column; align-items: stretch"><div style="display: flex; align-items: center; gap: 8px"><div class="g"><div style="font-weight: 500">Syncing · 34%</div><div class="sub">2.3 of 6.8 GB · file 1 of 2</div></div><button class="bt o" style="padding: 0 18px">Pause</button><button class="bt o" style="padding: 0 18px">Stop</button></div><div class="pg"><i style="width: 34%"></i></div></div>
+</div></div>
+
+</div>
+<div class="dark row3">
+
+<div class="col"><div class="cap">All files · dark</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button class="on">All files</button><button>On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Series</div><div class="sub">14.2 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Series on device"><i></i></button><button class="ib" aria-label="Actions for Series"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Courses</div><div class="sub">8.4 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Courses on device"><i></i></button><button class="ib" aria-label="Actions for Courses"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Family archive 1998.mkv</div><div class="sub">5.6 GB · <span class="pr">Waiting for sync</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Family archive on device"><i></i></button><button class="ib" aria-label="Actions for Family archive"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · <span class="wn">On device, outdated</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Drone footage raw.mov</div><div class="sub">12.8 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Drone footage on device"><i></i></button><button class="ib" aria-label="Actions for Drone footage"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar"><div class="g"><div style="font-weight: 500">6.8 GB to download</div><div class="sub">41 GB free on device</div></div><button class="bt f">Sync</button></div>
+</div></div>
+
+<div class="col"><div class="cap">On device tab · dark</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button>All files</button><button class="on">On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · Movies</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · Movies · <span class="wn">Outdated</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Episode 01.mkv</div><div class="sub">1.8 GB · Movies / Series</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Episode 01 on device"><i></i></button><button class="ib" aria-label="Actions for Episode 01"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Episode 02.mkv</div><div class="sub">1.7 GB · Movies / Series</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Episode 02 on device"><i></i></button><button class="ib" aria-label="Actions for Episode 02"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · Movies</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar"><div class="g"><div style="font-weight: 500">6.8 GB to download</div><div class="sub">41 GB free on device</div></div><button class="bt f">Sync</button></div>
+</div></div>
+
+<div class="col"><div class="cap">Syncing · dark</div>
+<div class="ph">
+<div class="top"><button class="ib" aria-label="Back to folders"><svg class="ic" aria-hidden="true"><use href="#back"/></svg></button><div class="ttl">Movies<div class="sub ok">2 of 3 devices connected</div></div><button class="ib" aria-label="Settings"><svg class="ic" aria-hidden="true"><use href="#gear"/></svg></button></div>
+<div class="tabs"><button class="on">All files</button><button>On device · 17.3 GB</button></div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px"><span class="sub">Sort by</span><button class="chip on">Name</button><button class="chip">Size</button><button class="chip">Date</button></div>
+<div class="fl">
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Series</div><div class="sub">14.2 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Series on device"><i></i></button><button class="ib" aria-label="Actions for Series"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#folder"/></svg><div class="g"><div>Courses</div><div class="sub">8.4 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Courses on device"><i></i></button><button class="ib" aria-label="Actions for Courses"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Altai trip 2024.mp4</div><div class="sub">3.1 GB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Altai trip on device"><i></i></button><button class="ib" aria-label="Actions for Altai trip"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g" style="display: flex; flex-direction: column; gap: 4px"><div>Family archive 1998.mkv</div><div class="pg" style="height: 4px"><i style="width: 41%; height: 4px"></i></div><div class="sub pr">2.3 of 5.6 GB</div></div><button class="sw on" aria-pressed="true" aria-label="Keep Family archive on device"><i></i></button><button class="ib" aria-label="Actions for Family archive"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Conference talk.mp4</div><div class="sub">1.2 GB · <span class="pr">Waiting</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Conference talk on device"><i></i></button><button class="ib" aria-label="Actions for Conference talk"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#video"/></svg><div class="g"><div>Drone footage raw.mov</div><div class="sub">12.8 GB</div></div><button class="sw off" aria-pressed="false" aria-label="Keep Drone footage on device"><i></i></button><button class="ib" aria-label="Actions for Drone footage"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="r"><svg class="ic sub" aria-hidden="true"><use href="#doc"/></svg><div class="g"><div>Notes.pdf</div><div class="sub">2 MB · <span class="ok">On device</span></div></div><button class="sw on" aria-pressed="true" aria-label="Keep Notes on device"><i></i></button><button class="ib" aria-label="Actions for Notes"><svg class="ic" aria-hidden="true"><use href="#more"/></svg></button></div>
+</div>
+<div class="bar" style="flex-direction: column; align-items: stretch"><div style="display: flex; align-items: center; gap: 8px"><div class="g"><div style="font-weight: 500">Syncing · 34%</div><div class="sub">2.3 of 6.8 GB · file 1 of 2</div></div><button class="bt o" style="padding: 0 18px">Pause</button><button class="bt o" style="padding: 0 18px">Stop</button></div><div class="pg"><i style="width: 34%"></i></div></div>
+</div></div>
+
+</div>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Screens and flows, first release
 
-Status: draft, not yet approved. Visual style is a separate step after this document is agreed.
+Status: draft, not yet approved. Visual style and control layout are in [ui.md](ui.md).
 
 ## Screens
 
@@ -50,12 +50,13 @@ A folder offered later by any device appears as a banner on Files with an accept
 ### 3. Browsing and selecting
 
 - Top level lists the shared folders. With one folder the app opens straight into it.
+- Two tabs: "All files" and "On device". "On device" lists only the files kept on the device, across subfolders, with their total size in the tab label.
 - Sort by name, size or modification date. The default is name. There is no search.
 - Each row shows name, size and state. Folders show the total size of their selected content.
 - Each row has a "keep on device" toggle. Toggling a folder applies to everything inside it, including files added to it later.
 - File states: not selected, selected and waiting for sync, downloading, on device, on device but outdated.
 - A bar at the bottom shows how much is waiting for download, the free space on the device and the Sync button.
-- A file that is not on the device has a Download action (flow 6).
+- Each row has a menu: Download now (flow 6), Open, Remove from device, Details. Only the actions that apply to the file's state are shown.
 - Selection changes are saved at once but download nothing until Sync is pressed.
 
 ### 4. Deselecting
