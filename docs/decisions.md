@@ -21,7 +21,7 @@ All decided on 2026-11-02.
 - **Automatic updates in the first release (2026-11-14):** new versions of files kept on the device and new files in selected folders download on their own in a background job, on the networks the sync network setting allows. They are noticed when the app refreshes the list; the job keeps running after the app is closed and then ends.
 - **Folder size (2026-11-14):** a folder row shows the total size of its selected content, the part kept for offline use.
 - **Application ID (2026-11-14):** `app.avoska`. It cannot change after the first Google Play release.
-- **App name (2026-11-15):** "Avoska", with the repository to become `avoska-android`. The store and trademark checks found nothing blocking; the closest is a pending US application AVOSCA (classes 9 and 42, task-confirmation software). The user accepted the name. The product targets the worldwide market; the store title is the Latin "Avoska".
+- **App name:** "Avoska"; the repository becomes `avoska-android`. The store title is the Latin "Avoska"; the product targets the worldwide market.
 - **Git workflow:** work happens on `master`. Committing is not available to agents at the moment, so the operator commits. This may change: see the `agent-commit-policy` task.
 - **App design (2026-11-14):** approved. Screens and flows are in [design/flows.md](design/flows.md), visual style and control layout in [design/ui.md](design/ui.md).
 
