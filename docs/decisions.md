@@ -21,6 +21,7 @@ All decided on 2026-11-02.
 - **Automatic updates in the first release (2026-11-14):** new versions of files kept on the device and new files in selected folders download on their own in a background job, on the networks the sync network setting allows. They are noticed when the app refreshes the list; the job keeps running after the app is closed and then ends.
 - **Folder size (2026-11-14):** a folder row shows the total size of its selected content, the part kept for offline use.
 - **Application ID (2026-11-14):** `app.avoska`. It cannot change after the first Google Play release.
+- **App name (2026-11-15):** "Avoska", with the repository to become `avoska-android`. The store and trademark checks found nothing blocking; the closest is a pending US application AVOSCA (classes 9 and 42, task-confirmation software). The user accepted the name. The product targets the worldwide market; the store title is the Latin "Avoska".
 - **Git workflow:** work happens on `master`. Committing is not available to agents at the moment, so the operator commits. This may change: see the `agent-commit-policy` task.
 - **App design (2026-11-14):** approved. Screens and flows are in [design/flows.md](design/flows.md), visual style and control layout in [design/ui.md](design/ui.md).
 
@@ -39,7 +40,6 @@ All decided on 2026-11-02.
 
 ## Open questions
 
-- **App name:** "Avoska" is chosen, with the repository to become `avoska-android`; the name is not yet checked against stores and trademark registers. See the `rename-to-avoska` task.
 - **Periodic background sync:** checking for changes without opening the app is discussed after the first release. See the `background-sync-design` task.
 - **Verification setup:** how an agent reproduces and checks everything. See the `verification-setup` task.
 - **Agent commits and operator control:** whether agents should be allowed to commit, and where the operator's control boundary should sit. See the `agent-commit-policy` task.
