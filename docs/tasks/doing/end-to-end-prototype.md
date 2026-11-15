@@ -1,6 +1,6 @@
 ---
 title: Build and verify an end-to-end prototype
-assignee: agent
+assignee: together
 depends_on:
   - verification-setup
 touches:
@@ -56,4 +56,4 @@ Any behaviour the prototype relies on is checked locally and covered by a local 
 - 16 KB runtime is untested: the emulator broker has no 16 KB image.
 
 ## Next
-Milestone 2, downloads. Start with the UIDT job for Sync: write the app's selection into ignore lines with ancestor lines (mirror `engine/ignorepattern.go`), start Syncthing with `downloadJob` true so the gate opens, end the job by stopping Syncthing, and start it again with the gate closed if the app is still on screen. Then: Download now as a UIDT job that arms only its file on a network the setting does not allow; WorkManager work for automatic updates with the sync network constraint; deselect in the order ignore, scan, delete; the progress notification with pause and stop. Extend `dev/e2e-emulator.sh` to check each. Also check on the device the free-space lookup on app storage, and that a job's transfer uses the job's network. After that: `FileProvider` and VLC, then the tree cache.
+Milestone 2, downloads: agree the plan with the user before building. An agent proposes it: job types and their lifecycle (Sync, Download now, automatic updates), how each job opens and closes the gate, which network a job uses, the notification with pause and stop, deselecting, `FileProvider` and VLC, how each step is verified, and the split into pull requests. Open questions go to the user with a recommendation each. Turn the agreed plan into the steps above, then build it.
