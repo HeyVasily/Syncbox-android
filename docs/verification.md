@@ -1,11 +1,12 @@
 # Verification
 
-How the app is checked, from host-only tests to the installed app on an emulator. CI runs only the repository checks so far ([ci.md](ci.md)); everything below runs locally.
+How the app is checked, from host-only tests to the installed app on an emulator. CI runs the repository and build checks, and the instrumented tests on emulators ([ci.md](ci.md)); the rest below runs locally.
 
 | Level | Command | What it covers |
 |---|---|---|
 | Host Go tests | `bash dev/test-engine.sh` | The bridge's start and stop, then Syncthing behaviour against a second Syncthing ([engine/README.md](../engine/README.md)) |
 | App build | `bash dev/build-app.sh` | Bridge AAR, debug and minified release APKs, lint, JVM unit tests, 16 KB checks |
+| Emulator, instrumented tests | `bash dev/instrumented-tests.sh` | The installed app starts Syncthing through the bridge, the library runs from the APK; also in CI on 4 KB and 16 KB pages |
 | Emulator, real engine | `bash dev/e2e-emulator.sh [--screenshots]` | Installed app with Syncthing in-process, paired with a peer on the host |
 | Emulator, demo screens | `bash dev/screenshots.sh` | Debug scenes on the demo engine ([screenshots](design/screenshots/README.md)) |
 
@@ -43,4 +44,4 @@ A "System UI isn't responding" dialog, which the loaded emulator sometimes shows
 
 Results go to `.build/e2e/result.txt`, one `CHECK ok:` line per check; logcat, the peer log and raw screenshots stay in `.build/e2e/`. `--screenshots` also saves the `real-*` screenshots in [design/screenshots](design/screenshots/README.md).
 
-The broker's API 36 image has 4 KB pages (`getconf PAGE_SIZE` is 4096); its catalog has no 16 KB image, so the 16 KB runtime test from the decisions is still open.
+The broker's API 36 image has 4 KB pages (`getconf PAGE_SIZE` is 4096); its catalog has no 16 KB image. The 16 KB runtime check runs in CI instead: the instrumented tests on the API 36 `google_apis_ps16k` image ([ci.md](ci.md#emulator)).

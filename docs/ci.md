@@ -6,15 +6,16 @@ The repository is public. `.github/workflows/ci.yml` runs on every pull request 
 |---|---|---|
 | Secrets | `dev/check-secrets.sh` | gitleaks over the full git history and the uncommitted working tree |
 | Repository rules | `dev/check-repo.sh` | signing keys, `local.properties` and similar files, APK/AAB files, files over 1 MiB (except `gradle/verification-metadata.xml`), Cyrillic text, development machine paths, missing dependency protections (below) |
-| Workflows | `dev/lint-workflows.sh` | actionlint, zizmor and ShellCheck |
-| Android | `dev/check-android.sh` | Android Lint, unit tests, a debug build, then `dev/check-16kb.sh` on the built APKs |
+| Workflows | `dev/lint-workflows.sh` | actionlint, zizmor and ShellCheck; secrets outside an environment or in a pull request workflow (below) |
+| Android | `dev/check-android.sh` | Android Lint, unit tests, a debug build, the release App Bundle, the instrumented test APK (compiled only), then `dev/check-16kb.sh` |
 | CodeQL | `.github/workflows/codeql.yml` | code scanning of Kotlin, Go and the workflows; not part of `dev/check.sh` |
+| Emulator | `.github/workflows/emulator.yml` | instrumented tests on API 34 (4 KB pages) and API 36 (16 KB pages); not part of `dev/check.sh` |
 
-Tools are official release binaries pinned by version and SHA-256 in `dev/pinned-tool.sh`, cached in `.build/tools/`. Actions are pinned by commit SHA; Dependabot updates them weekly.
+Tools are official release binaries (bundletool: its release JAR) pinned by version and SHA-256 in `dev/pinned-tool.sh`, cached in `.build/tools/`. Actions are pinned by commit SHA; Dependabot updates them weekly.
 
 ## Android
 
-`dev/check-android.sh` does nothing until `gradlew` exists. From then on it runs `lint`, `testDebugUnitTest` and `assembleDebug` for all modules, and needs a JDK and `ANDROID_HOME`. CI also validates the Gradle wrapper and keeps the reports of a failed build for 7 days.
+`dev/check-android.sh` does nothing until `gradlew` exists. From then on it runs `lint`, `testDebugUnitTest`, `assembleDebug`, `bundleRelease` and `assembleDebugAndroidTest` for all modules, and needs a JDK and `ANDROID_HOME`. CI also validates the Gradle wrapper and keeps the reports of a failed build for 7 days.
 
 The app build compiles the Syncthing bridge from `engine/` (`dev/build-bridge.sh`), so it also needs Go and NDK 30.0.16248370 in `ANDROID_NDK_HOME`. GitHub runners ship an older NDK; in CI `dev/install-ndk.sh` installs the expected one with `sdkmanager`.
 
@@ -22,7 +23,28 @@ The app build compiles the Syncthing bridge from `engine/` (`dev/build-bridge.sh
 
 `.github/workflows/codeql.yml` is an advanced setup: GitHub's default setup builds Kotlin without a way to install Go and the NDK first. It runs on pull requests, on pushes to `master` and weekly. The `master` ruleset requires its results. The default setup has to stay disabled in the repository settings, because GitHub rejects advanced-setup results while it is enabled.
 
-`dev/check-16kb.sh [apk...]` checks each APK with `zipalign -c -P 16`, and checks that every LOAD segment of every `arm64-v8a` and `x86_64` library is aligned to 16 KB. Background: [research/16kb-page-size.md](research/16kb-page-size.md).
+## 16 KB pages
+
+`dev/check-16kb.sh [apk|aab...]` checks every APK under `*/build/outputs/apk/` (except the androidTest APK) and every App Bundle under `*/build/outputs/bundle/`, or the files it is given. A bundle is checked through the split APKs that bundletool generates from it, as Play would serve them, after `bundletool validate`; its config must store libraries uncompressed with `PAGE_ALIGNMENT_16K`. In each APK it checks:
+
+- `zipalign -c -P 16`;
+- every `arm64-v8a` and `x86_64` library is stored uncompressed, and every LOAD segment is aligned to 16 KB;
+- each of `arm64-v8a` and `x86_64` has at least one library (for a bundle: in one of its splits), because the Syncthing bridge is built for both.
+
+At runtime the emulator workflow checks the app on a 16 KB device. Background: [research/16kb-page-size.md](research/16kb-page-size.md).
+
+## Emulator
+
+`.github/workflows/emulator.yml` runs the instrumented tests (`app/src/androidTest`) with `dev/instrumented-tests.sh --device` on GitHub's hosted runners, which have KVM, in two jobs: API 34 (minSdk) with the standard image, and API 36 (targetSdk) with the `google_apis_ps16k` image, whose page size is 16 KB. The script checks the page size the job expects, installs the debug app and its test APK fresh, runs them with `am instrument`, and fails on a failed test or an app crash in logcat. The tests start the real Syncthing through the bridge and check that its library runs from the APK in place. It does not use Gradle's `connectedDebugAndroidTest`, which downloads the Unified Test Platform outside `gradle/verification-metadata.xml`.
+
+The workflow is too slow for every pull request. It runs weekly, on demand (`workflow_dispatch`), on pushes to `master`, and on pull requests that change the workflow, the script or the instrumented tests. A newer run for the same branch or pull request cancels the running one. Locally, `bash dev/instrumented-tests.sh` builds and runs the same tests on an emulator from android-broker (`E2E_API`, default 36; the broker has no 16 KB image).
+
+## Secrets and release signing
+
+There is no release workflow yet. When one is added, its signing keys are secrets of a GitHub environment (for example `release`) that allows only `master` or release tags and needs a reviewer; that protection is a repository setting that no check here can see. `dev/lint-workflows.sh` enforces the part in the files:
+
+- a job that uses a secret other than `GITHUB_TOKEN` must name an `environment` (zizmor's `secrets-outside-env` audit, run at the auditor level);
+- a workflow that `pull_request` or `pull_request_target` triggers uses no secret other than `GITHUB_TOKEN`, no `secrets: inherit`, and no `environment`.
 
 ## Dependencies
 
@@ -33,4 +55,4 @@ The app build compiles the Syncthing bridge from `engine/` (`dev/build-bridge.sh
 
 ## Not covered yet
 
-See the `android-ci-checks` task: making the current checks pass on the project, 16 KB checks of APKs generated from the App Bundle, `govulncheck` on the Go bridge, instrumented tests on an emulator, the release workflow with signing keys, and the F-Droid free-software check.
+See the `android-ci-checks` task: known vulnerabilities in the Go standard library the bridge is built with (OSV-Scanner reads only modules from `go.mod`; `govulncheck` sees the standard library), the release workflow with signing keys, and the F-Droid free-software check. The end-to-end check with a Syncthing peer (`dev/e2e-emulator.sh`) runs only locally.
