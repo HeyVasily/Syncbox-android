@@ -15,20 +15,20 @@ All decided on 2026-11-02.
 - **Automatic background sync:** periodic checks without opening the app come after the first release, as a separate task.
 - **Battery:** the app must not stay running in the background permanently. Saving battery is a hard requirement.
 - **Distribution:** GitHub and Google Play. F-Droid is planned.
-- **Order of work:** no prototypes yet. App design and the verification setup come first, so that an agent can build and fully check a prototype on its own.
+- **Order of work:** app design first (approved), then the end-to-end prototype; the verification setup is built along with it.
 - **Verification setup:** agents get an emulator in the yard for on-device checks. This setup is not a project deliverable.
 - **Network levels (2026-11-14):** offline mode: Syncthing does not run and the app uses no network. Online: the file list refreshes on any network and never downloads anything by itself. Every download runs in a background job that obeys the sync network setting; only Download now on one file ignores the setting, as decided for flow 6 on 2026-11-13.
 - **Automatic updates in the first release (2026-11-14):** new versions of files kept on the device and new files in selected folders download on their own in a background job, on the networks the sync network setting allows. They are noticed when the app refreshes the list; the job keeps running after the app is closed and then ends.
 - **Folder size (2026-11-14):** a folder row shows the total size of its selected content, the part kept for offline use.
 - **Application ID (2026-11-14):** `app.avoska`. It cannot change after the first Google Play release.
 - **App name:** "Avoska"; the repository becomes `avoska-android`. The store title is the Latin "Avoska"; the product targets the worldwide market.
-- **Git workflow:** work happens on `master`. Committing is not available to agents at the moment, so the operator commits. This may change: see the `agent-commit-policy` task.
+- **Git workflow:** short branches with pull requests into `master`. Agents commit and open pull requests when the operator asks; merging needs the operator's approval.
+- **Syncthing integration:** unmodified Syncthing runs in-process as a Go library through a thin gomobile bridge (`engine/bridge`), controlled through its REST API.
+- **Toolchain:** Go 1.26.2, NDK r30 (`30.0.16248370`), Syncthing pinned in `engine/go.mod`, AGP 9.5.1, compileSdk and targetSdk 36.
 - **App design (2026-11-14):** approved. Screens and flows are in [design/flows.md](design/flows.md), visual style and control layout in [design/ui.md](design/ui.md).
 
 ## Proposed, not yet confirmed
 
-- **Syncthing integration:** run Syncthing as an in-process Go library through a thin gomobile bridge, controlled through its REST API. Syncthing has no official SDK.
-- **Toolchain starting point:** Go 1.27.3, NDK r30, Syncthing v2.1.7, AGP 9.5.0 and target SDK 36, per the [16 KB research](research/16kb-page-size.md). The full combination has not been built yet. Re-check versions when the project is set up.
 - **ABIs:** ship `arm64-v8a`. Use `x86_64` for emulator testing, possibly only in a test variant.
 - **16 KB checks:** native libraries stay uncompressed (`useLegacyPackaging = false`). CI checks ELF alignment of every 64-bit library and ZIP alignment of APKs, including those generated from the App Bundle.
 - **16 KB runtime testing:** test inside the installed app, not through `adb shell`, because app seccomp rules do not apply there. Test on a 16 KB image with compatibility mode off, and on a normal 4 KB image at API 34.
