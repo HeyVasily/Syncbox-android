@@ -6,9 +6,30 @@ behaviour the design relies on with host-side Go tests on `linux/amd64`. No
 emulator and no network beyond `127.0.0.1` are needed. The findings are in
 [`docs/research/engine-host-findings.md`](../docs/research/engine-host-findings.md).
 
-The only non-test code is the ignore-file generator in `ignorepattern.go`
+Non-test code: the ignore-file generator in `ignorepattern.go`
 (`WhitelistLines`, `IncludeLine`, `ExcludeLine`), which the app's own
-generator should mirror.
+generator should mirror, and `bridge/`, the app's gomobile bridge.
+
+## bridge
+
+`bridge/` is the only Go code the app ships: `Start(home, downloadJob)`,
+`Stop`, `Running`, `Failure`, `APIAddress`, `APIKey` and `DeviceID`, with
+strings and bools only, so no Syncthing type crosses into Kotlin. Start forces
+the REST API on (random 127.0.0.1 port, new API key per start) with GUI
+auth on (user `avoska`, a random password nobody keeps, so other apps on
+the phone get 401 on `/rest` and the API key is the only way in), turns off
+usage and crash reporting and upgrades, lowers `protocol.CloseTimeout` to
+1 s, and, unless a download job is starting it, writes the download gate
+closed (`minDiskFree` 1000000 TB) into every folder and the folder defaults
+before Syncthing starts. Exported functions turn panics into errors; a panic
+in one of Syncthing's goroutines still ends the process. `dev/build-bridge.sh`
+builds it into an AAR; `bridge_test.go` (run first by `dev/test-engine.sh`)
+starts and stops it twice and checks that a folder left open is closed again,
+that a second Start fails while one runs, and that requests without the key
+are rejected on `/rest`, also with a CSRF cookie and header from `/`.
+gomobile and gobind are pinned by the `tool` directives in `go.mod`; adding
+them added `golang.org/x/{mobile,mod,sync,tools}` as indirect requirements.
+`dev/build-bridge.sh` builds with exactly the Go version `go.mod` names.
 
 ## Running
 

@@ -88,6 +88,7 @@ fun FilesScreen(
         when (it) {
             is FilesMessage.Opened -> stringResource(R.string.message_opened, it.name)
             FilesMessage.DownloadUnavailable -> stringResource(R.string.message_download_unavailable)
+            FilesMessage.DownloadsNotAvailable -> stringResource(R.string.message_downloads_not_available)
         }
     }
     val scope = rememberCoroutineScope()
@@ -181,6 +182,7 @@ fun FilesScreen(
         FileMenuSheet(
             row = row,
             canDownload = state.canDownload,
+            downloadsAvailable = state.downloadsAvailable,
             onAction = { viewModel.onMenuAction(row, it) },
             onDismiss = viewModel::dismissMenu,
         )
@@ -195,6 +197,7 @@ private fun connectionText(status: Connection): String = when (status) {
     is Connection.Online -> pluralStringResource(R.plurals.status_connected, status.total, status.connected, status.total)
     Connection.NoDevice -> stringResource(R.string.status_offline)
     Connection.Disabled -> stringResource(R.string.status_offline_mode)
+    is Connection.Failed -> stringResource(R.string.status_engine_failed)
 }
 
 @Composable
@@ -498,6 +501,8 @@ internal fun sizeText(entry: Entry): String = when (val label = sizeLabel(entry)
 private fun blockText(block: SyncBlock): String = when (block) {
     SyncBlock.OFFLINE_MODE -> stringResource(R.string.block_offline_mode)
     SyncBlock.NO_DEVICE -> stringResource(R.string.block_no_device)
+    SyncBlock.ENGINE_FAILED -> stringResource(R.string.status_engine_failed)
+    SyncBlock.DOWNLOADS_UNAVAILABLE -> stringResource(R.string.block_downloads_unavailable)
     SyncBlock.NETWORK_OFF -> stringResource(R.string.block_network_off)
     SyncBlock.CONNECTING -> stringResource(R.string.status_connecting)
     SyncBlock.NOTHING_TO_DOWNLOAD -> stringResource(R.string.nothing_to_download)

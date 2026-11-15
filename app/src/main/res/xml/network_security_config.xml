@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cleartext only to Syncthing's REST API on loopback, in this process. Other apps can reach
+     that port, so the bridge turns Syncthing's GUI auth on and the per-start API key is the only
+     way in; the traffic itself never leaves the device.
+     Syncthing's own connections to other devices are TLS and do not go through this policy. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
