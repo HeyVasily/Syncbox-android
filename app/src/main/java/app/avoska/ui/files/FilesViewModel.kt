@@ -28,7 +28,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Why Sync, or Resume, is disabled. */
-enum class SyncBlock { CONNECTING, OFFLINE_MODE, NO_DEVICE, NETWORK_OFF, NOTHING_TO_DOWNLOAD, NOT_ENOUGH_SPACE }
+enum class SyncBlock {
+    CONNECTING, OFFLINE_MODE, NO_DEVICE, ENGINE_FAILED, DOWNLOADS_UNAVAILABLE, NETWORK_OFF, NOTHING_TO_DOWNLOAD, NOT_ENOUGH_SPACE,
+}
 
 sealed interface SyncBar {
     data class Idle(val pendingBytes: Long, val freeBytes: Long, val block: SyncBlock?, val failure: SyncFailure?) : SyncBar
@@ -46,6 +48,9 @@ sealed interface SyncBar {
 sealed interface FilesMessage {
     data class Opened(val name: String) : FilesMessage
     data object DownloadUnavailable : FilesMessage
+
+    /** This build cannot download yet ([EngineStatus.downloadsAvailable]). */
+    data object DownloadsNotAvailable : FilesMessage
 }
 
 data class FilesUiState(
@@ -58,6 +63,7 @@ data class FilesUiState(
     val onDeviceBytes: Long? = null,
     val bar: SyncBar,
     val canDownload: Boolean,
+    val downloadsAvailable: Boolean = true,
     /** Flow 2: folders offered later by any device, with the offering device's name. */
     val offers: List<Pair<FolderOffer, String>> = emptyList(),
     val menu: FileRow? = null,
@@ -132,7 +138,7 @@ class FilesViewModel(
             return
         }
         if (!engine.downloadNow(entry.ref)) {
-            local.update { it.copy(message = FilesMessage.DownloadUnavailable) }
+            local.update { it.copy(message = downloadFailedMessage()) }
             return
         }
         pendingOpen?.cancel()
@@ -154,6 +160,9 @@ class FilesViewModel(
         pendingOpen = null
     }
 
+    private fun downloadFailedMessage(): FilesMessage =
+        if (engine.status.value.downloadsAvailable) FilesMessage.DownloadUnavailable else FilesMessage.DownloadsNotAvailable
+
     fun showMenu(ref: FileRef) = local.update { it.copy(menu = ref) }
     fun dismissMenu() = local.update { it.copy(menu = null) }
     fun requestRemove(ref: FileRef) = local.update { it.copy(remove = ref) }
@@ -162,7 +171,7 @@ class FilesViewModel(
         local.update { it.copy(menu = null) }
         when (action) {
             MenuAction.DOWNLOAD_NOW ->
-                if (!engine.downloadNow(row.entry.ref)) local.update { it.copy(message = FilesMessage.DownloadUnavailable) }
+                if (!engine.downloadNow(row.entry.ref)) local.update { it.copy(message = downloadFailedMessage()) }
             MenuAction.OPEN -> openFile(row)
             MenuAction.REMOVE -> requestRemove(row.entry.ref)
             MenuAction.DETAILS -> local.update { it.copy(details = row.entry.ref) }
@@ -216,6 +225,7 @@ class FilesViewModel(
             onDeviceBytes = onDevice.sumOf { it.localBytes },
             bar = syncBar(status, prefs),
             canDownload = status.canDownload,
+            downloadsAvailable = status.downloadsAvailable,
             offers = status.pendingOffers.map { offer ->
                 offer to (status.devices.firstOrNull { it.id == offer.deviceId }?.name ?: offer.deviceId.substringBefore('-'))
             },
@@ -236,6 +246,7 @@ private fun connectionBlock(status: EngineStatus): SyncBlock? = when (status.con
     Connection.Disabled -> SyncBlock.OFFLINE_MODE
     Connection.Connecting -> SyncBlock.CONNECTING
     Connection.NoDevice -> SyncBlock.NO_DEVICE
+    is Connection.Failed -> SyncBlock.ENGINE_FAILED
     is Connection.Online -> null
 }
 
@@ -254,6 +265,7 @@ internal fun syncBar(status: EngineStatus, prefs: Preferences): SyncBar {
         )
     }
     val block = connectionBlock(status) ?: when {
+        !status.downloadsAvailable -> SyncBlock.DOWNLOADS_UNAVAILABLE
         networkOff -> SyncBlock.NETWORK_OFF
         status.pendingBytes == 0L -> SyncBlock.NOTHING_TO_DOWNLOAD
         status.pendingBytes > status.freeBytes -> SyncBlock.NOT_ENOUGH_SPACE

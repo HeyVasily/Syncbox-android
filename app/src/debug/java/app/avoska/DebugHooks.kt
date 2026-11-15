@@ -12,7 +12,8 @@ import app.avoska.ui.files.FilesViewModel
 /**
  * Debug-only scenes: fixed demo states for screenshots, opened with
  * `adb shell am start -n app.avoska/.MainActivity --es scene <name>` (see dev/screenshots.sh).
- * Scenes stop the demo simulation so the state holds still.
+ * A scene must start a fresh process (force-stop first): the process then runs the demo engine
+ * instead of Syncthing. Scenes stop the demo simulation so the state holds still.
  */
 object DebugHooks {
     private const val EXTRA = "scene"
@@ -25,9 +26,12 @@ object DebugHooks {
         "settings", "sync-network", "device-id", "add-device", "pairing-waiting", "folder-offer",
     )
 
+    /** Scenes run on the demo engine; without a scene the debug build uses real Syncthing. */
+    fun wantsDemo(intent: Intent): Boolean = intent.getStringExtra(EXTRA) in scenes
+
     fun startStack(container: AppContainer, intent: Intent): List<Screen>? {
         val name = intent.getStringExtra(EXTRA)?.takeIf { it in scenes } ?: return null
-        val engine = container.engine as DemoSyncEngine
+        val engine = container.engine as? DemoSyncEngine ?: return null
         engine.autoAdvance = false
         engine.connectPendingDevices()
         val files = listOf(Screen.Files(DemoData.FOLDER_ID))

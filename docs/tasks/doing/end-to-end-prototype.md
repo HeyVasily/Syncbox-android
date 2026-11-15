@@ -21,7 +21,7 @@ The riskiest assumptions are proven by a working prototype: embedding Syncthing,
 Any behaviour the prototype relies on is checked locally and covered by a local test as part of this task. Do not split verification into separate tasks. Checks that need no Android (Syncthing behaviour) run as host-side tests against a second Syncthing instance, before the emulator.
 
 ## Acceptance
-- [ ] Syncthing runs in-process and pairs with a peer.
+- [x] Syncthing runs in-process and pairs with a peer.
 - [ ] One selected file syncs into internal storage, and an unselected file does not.
 - [ ] Deselecting a file behaves as designed.
 - [ ] A sync continues after the app is minimized and shows progress in a notification.
@@ -49,3 +49,4 @@ Host-side Syncthing questions are answered in `docs/research/engine-host-finding
 - 2026-11-14T01:57Z claude-fable: the user said the design is ready and that another agent in another environment will implement this; removed the `app-design` dependency. Added the research report, the working rule and the list of behaviours to verify locally.
 - 2026-11-14T05:30Z claude-opus: claimed at the user's request for the host-side part. Added `engine/` (pinned Syncthing v2.1.7, Go 1.26.2) with 29 host tests and the findings report; three review rounds. `dev/test-engine.sh` exit 0, 29/29, 278 s. Results: paused folder gets no index; armed content downloads by itself about 1.3 s after an index change; ignore, scan, delete is clean, delete, scan, ignore leaves the peer at 0%; nested selections need ancestor lines; finished rule reliable after the scan; 50 start/stop cycles without goroutine, descriptor or Go heap growth; partial files survive stop and kill; 100k files with 5k lines scan in about 9 s; 47 special-name targets pass.
 - 2026-11-14T06:30Z claude-opus: the user accepted the network-levels model and automatic updates in the first release; docs updated.
+- 2026-11-14T21:00Z claude-opus: milestone 1 of the Android part: gomobile bridge (`engine/bridge`), `RestSyncEngine` with the download gate closed, REST reachable only with the API key, and `dev/e2e-emulator.sh` (API 36 x86_64, host peer): pairs, accepts a folder, lists the peer's files, downloads nothing, stops in the background and in offline mode. Two review rounds. Next milestone: download jobs (UIDT for Sync and Download now, WorkManager for automatic updates) that open the gate and use the job's network, selection to ignore lines with ancestors, deselect order, notification, FileProvider, tree cache; 16 KB runtime still untested (no 16 KB image in the broker).

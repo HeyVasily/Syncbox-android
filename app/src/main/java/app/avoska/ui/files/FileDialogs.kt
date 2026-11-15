@@ -33,7 +33,13 @@ import java.time.format.FormatStyle
 /** The row menu (ui.md): only the actions that apply to the file's state. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FileMenuSheet(row: FileRow, canDownload: Boolean, onAction: (MenuAction) -> Unit, onDismiss: () -> Unit) {
+fun FileMenuSheet(
+    row: FileRow,
+    canDownload: Boolean,
+    downloadsAvailable: Boolean,
+    onAction: (MenuAction) -> Unit,
+    onDismiss: () -> Unit,
+) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -55,6 +61,7 @@ fun FileMenuSheet(row: FileRow, canDownload: Boolean, onAction: (MenuAction) -> 
                         title = stringResource(R.string.action_download_now),
                         hint = stringResource(
                             when {
+                                !downloadsAvailable -> R.string.action_downloads_not_available_hint
                                 !canDownload -> R.string.action_download_unavailable_hint
                                 row.entry.state == EntryState.Outdated -> R.string.action_download_new_version_hint
                                 else -> R.string.action_download_now_hint

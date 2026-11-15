@@ -20,6 +20,7 @@
     </plurals>
     <string name="status_offline">Offline</string>
     <string name="status_offline_mode">Offline mode</string>
+    <string name="status_engine_failed">Syncthing could not start</string>
     <string name="tab_all_files">All files</string>
     <string name="tab_on_device">On device · %1$s</string>
     <string name="tab_on_device_plain">On device</string>
@@ -53,6 +54,7 @@
     <string name="block_offline_mode">Sync is unavailable in offline mode</string>
     <string name="block_no_device">No device connected</string>
     <string name="block_network_off">Sync is off in Settings</string>
+    <string name="block_downloads_unavailable">Downloading is not available in this version yet</string>
     <string name="block_not_enough_space">%1$s more free space needed</string>
     <string name="block_not_enough_space_short">Not enough free space</string>
     <string name="failure_connection_lost">Sync stopped: connection lost</string>
@@ -71,6 +73,7 @@
     <string name="action_download_now_hint">Downloads it now, on any network</string>
     <string name="action_download_new_version_hint">Gets the new version, on any network</string>
     <string name="action_download_unavailable_hint">Needs a connected device</string>
+    <string name="action_downloads_not_available_hint">Not available in this version yet</string>
     <string name="action_remove">Remove from device</string>
     <string name="action_details">Details</string>
     <string name="remove_title">Remove from device?</string>
@@ -84,6 +87,7 @@
     <string name="state_not_selected">Not on device</string>
     <string name="message_opened">Demo: %1$s would open in another app</string>
     <string name="message_download_unavailable">No device is connected, so nothing can be downloaded</string>
+    <string name="message_downloads_not_available">Downloading is not available in this version yet</string>
 
     <!-- Settings -->
     <string name="section_devices">Devices</string>
@@ -102,7 +106,7 @@
     <string name="storage">Storage</string>
     <string name="storage_value">%1$s used · %2$s free</string>
     <string name="about">About and licences</string>
-    <string name="about_text">Avoska %1$s, demo build with example data. A Syncthing client. Open-source licences are listed here once the app has dependencies beyond AndroidX and QR Code generator (MIT).</string>
+    <string name="about_text">Avoska %1$s, prototype build. A Syncthing client that runs Syncthing (MPL-2.0) inside the app. Open-source licences of Syncthing, OkHttp, kotlinx.serialization, AndroidX and QR Code generator will be listed here.</string>
 
     <!-- Sync network -->
     <string name="sync_network_intro">Where the Sync button may download. Downloading one file from its menu works on any network.</string>

@@ -39,7 +39,7 @@ capture() {
   done
   adb shell cmd uimode night no
   adb shell "${demo[@]}" exit >/dev/null
-  if adb logcat -d -b crash | grep -q 'app.avoska'; then
+  if adb logcat -d -b crash | grep 'app.avoska' >/dev/null; then
     adb logcat -d -b crash
     return 1
   fi

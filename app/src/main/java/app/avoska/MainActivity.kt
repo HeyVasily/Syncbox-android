@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val container = (application as AvoskaApp).container
+        val container = (application as AvoskaApp).container(demo = DebugHooks.wantsDemo(intent))
         val debugStack = if (savedInstanceState == null) DebugHooks.startStack(container, intent) else null
         val start = debugStack ?: startStack(container.engine.status.value)
         setContent {

@@ -8,12 +8,19 @@ The repository is public. `.github/workflows/ci.yml` runs on every pull request 
 | Repository rules | `dev/check-repo.sh` | signing keys, `local.properties` and similar files, APK/AAB files, files over 1 MiB (except `gradle/verification-metadata.xml`), Cyrillic text, development machine paths, missing dependency protections (below) |
 | Workflows | `dev/lint-workflows.sh` | actionlint, zizmor and ShellCheck |
 | Android | `dev/check-android.sh` | Android Lint, unit tests, a debug build, then `dev/check-16kb.sh` on the built APKs |
+| CodeQL | `.github/workflows/codeql.yml` | code scanning of Kotlin, Go and the workflows; not part of `dev/check.sh` |
 
 Tools are official release binaries pinned by version and SHA-256 in `dev/pinned-tool.sh`, cached in `.build/tools/`. Actions are pinned by commit SHA; Dependabot updates them weekly.
 
 ## Android
 
 `dev/check-android.sh` does nothing until `gradlew` exists. From then on it runs `lint`, `testDebugUnitTest` and `assembleDebug` for all modules, and needs a JDK and `ANDROID_HOME`. CI also validates the Gradle wrapper and keeps the reports of a failed build for 7 days.
+
+The app build compiles the Syncthing bridge from `engine/` (`dev/build-bridge.sh`), so it also needs Go and NDK 30.0.16248370 in `ANDROID_NDK_HOME`. GitHub runners ship an older NDK; in CI `dev/install-ndk.sh` installs the expected one with `sdkmanager`.
+
+## CodeQL
+
+`.github/workflows/codeql.yml` is an advanced setup: GitHub's default setup builds Kotlin without a way to install Go and the NDK first. It runs on pull requests, on pushes to `master` and weekly. The `master` ruleset requires its results. The default setup has to stay disabled in the repository settings, because GitHub rejects advanced-setup results while it is enabled.
 
 `dev/check-16kb.sh [apk...]` checks each APK with `zipalign -c -P 16`, and checks that every LOAD segment of every `arm64-v8a` and `x86_64` library is aligned to 16 KB. Background: [research/16kb-page-size.md](research/16kb-page-size.md).
 
