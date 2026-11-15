@@ -68,7 +68,7 @@ fi
 compat() { adb shell dumpsys package "$PKG" | tr -d '\r' | sed -n 's/^ *pageSizeCompat=//p' | head -n 1; }
 
 # control_apk <out>: the debug APK with every entry stored and every library starting 4 KB past a
-# 16 KB boundary, signed with the debug key. Fails unless zipalign -P 16 rejects it.
+# 16 KB boundary, signed with a throwaway key. Fails unless zipalign -P 16 rejects it.
 control_apk() {
   local sdk tools
   sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -96,7 +96,14 @@ PY
     printf 'the control APK is 16 KB-aligned\n' >&2
     return 1
   fi
-  "$tools/apksigner" sign --ks "$HOME/.android/debug.keystore" --ks-pass pass:android --out "$1" "$1.unsigned"
+  # A throwaway key outside the repository: the control is installed once and removed.
+  local key
+  key="$(mktemp -d)"
+  keytool -genkeypair -noprompt -keystore "$key/control.p12" -storetype PKCS12 -storepass control \
+    -alias control -dname CN=control -keyalg RSA -keysize 2048 -validity 1 >/dev/null 2>&1 &&
+    "$tools/apksigner" sign --ks "$key/control.p12" --ks-pass pass:control --out "$1" "$1.unsigned" ||
+    { rm -rf -- "$key"; return 1; }
+  rm -rf -- "$key"
 }
 
 if [ "$page" = 16384 ]; then
