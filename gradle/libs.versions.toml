@@ -8,7 +8,7 @@ lifecycle = "2.10.0"
 navigation3 = "1.2.1"
 qrcodegen = "1.8.0"
 # 5.5.x requires compileSdk 37.
-okhttp = "5.4.0"
+okhttp = "5.5.1"
 serialization = "1.13.0"
 junit = "4.13.2"
 # Test-only. The app uses the kotlinx-coroutines version that AndroidX brings; unit tests run on this one.
