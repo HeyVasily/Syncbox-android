@@ -8,7 +8,7 @@ lifecycle = "2.10.0"
 navigation3 = "1.2.1"
 qrcodegen = "1.8.0"
 junit = "4.13.2"
-# Matches the kotlinx-coroutines version that AndroidX resolves to.
+# Test-only. The app uses the kotlinx-coroutines version that AndroidX brings; unit tests run on this one.
 coroutines = "1.11.0"
 
 [libraries]
