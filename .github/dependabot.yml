@@ -12,6 +12,11 @@ updates:
       interval: weekly
     cooldown:
       default-days: 7
+    ignore:
+      # Compose 1.12 (BOM 2026.08.00 and later) needs compileSdk 37; the project stays on
+      # android-36 until docs/tasks/blocked/compile-sdk-37.md is done.
+      - dependency-name: androidx.compose:compose-bom
+        versions: ["[2026.08.00,)"]
   - package-ecosystem: gomod
     directory: /engine
     schedule:
