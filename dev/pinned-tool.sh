@@ -2,7 +2,7 @@
 # Official release binaries, verified by SHA-256 and cached in .build/tools.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks|osv-scanner}"
+name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks|osv-scanner|bundletool}"
 case "$(uname -sm)" in
   'Linux x86_64') arch=amd64; triple=x86_64-unknown-linux-gnu ;;
   'Linux aarch64') arch=arm64; triple=aarch64-unknown-linux-gnu ;;
@@ -50,6 +50,15 @@ case "$name" in
     url="https://github.com/google/osv-scanner/releases/download/v$version/osv-scanner_linux_$arch"
     member=archive
     ;;
+  bundletool)
+    # A Java archive: the same file on every platform. Run it with java -jar.
+    version=1.18.3
+    # Official release API assets[].digest SHA-256 value (no checksum manifest):
+    # https://api.github.com/repos/google/bundletool/releases/tags/1.18.3
+    checksum=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+    url="https://github.com/google/bundletool/releases/download/$version/bundletool-all-$version.jar"
+    member=archive
+    ;;
   *) printf 'unknown pinned tool: %s\n' "$name" >&2; exit 1 ;;
 esac
 tools="$ROOT/.build/tools"
@@ -73,6 +82,7 @@ case "$name" in
   zizmor) actual="$("$tool" --version)"; expected="zizmor $version" ;;
   gitleaks) actual="$("$tool" version)"; expected="$version" ;;
   osv-scanner) actual="$("$tool" --version)"; expected="osv-scanner version: $version" ;;
+  bundletool) actual="$(java -jar "$tool" version)"; expected="$version" ;;
 esac
 [ "${actual%%$'\n'*}" = "$expected" ] || { printf 'unexpected %s version\n' "$name" >&2; exit 1; }
 printf '%s\n' "$tool"
