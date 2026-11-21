@@ -33,10 +33,14 @@ status=0
 fail() { printf '::error::%s\n' "$*"; status=1; }
 die() { fail "$*"; exit 1; }
 # The device log and crash log are kept whatever happens, also when an adb command ends the
-# script early; crash.txt is read again only if the crash check below did not save it.
+# script early. crash.txt appears only after a complete read, so the trap reads it again
+# unless the crash check below saved it.
+read_crash_log() {
+  adb logcat -d -b crash > "$OUT/crash.txt.part" && mv -f "$OUT/crash.txt.part" "$OUT/crash.txt"
+}
 save_logs() {
   adb logcat -d > "$OUT/logcat.txt" 2>/dev/null || true
-  [ -f "$OUT/crash.txt" ] || adb logcat -d -b crash > "$OUT/crash.txt" 2>/dev/null || true
+  [ -f "$OUT/crash.txt" ] || read_crash_log 2>/dev/null || true
 }
 trap save_logs EXIT
 
@@ -80,7 +84,7 @@ adb shell am instrument -w -e pageSize "$expected" -e gojniRange "$range" \
 printf 'instrumented tests: %ds\n' "$(( $(date +%s) - start ))"
 grep -qE '^OK \([1-9][0-9]* tests?\)$' "$OUT/instrument.txt" || fail "instrumented tests failed (see above)"
 
-if adb logcat -d -b crash > "$OUT/crash.txt"; then
+if read_crash_log; then
   if grep -qF "$PKG" "$OUT/crash.txt"; then
     cat "$OUT/crash.txt"
     fail "the app crashed"

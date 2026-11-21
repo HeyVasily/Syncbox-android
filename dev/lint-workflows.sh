@@ -97,26 +97,51 @@ def expressions(text, whole):
     return found
 
 # Context names are case-insensitive. Every reference to the secrets context counts, also the
-# bare object as in toJSON(secrets), except .GITHUB_TOKEN and ['GITHUB_TOKEN'].
-SECRET = re.compile(r"(?<![\w.-])secrets\b(?:\s*\.\s*(\w+)|\s*\[\s*\x00(\d+)\x00\s*\])?", re.I)
+# bare object as in toJSON(secrets), except .GITHUB_TOKEN and ['GITHUB_TOKEN']. A property
+# named secrets (vars.SECRETS, also written vars . SECRETS) is not the context.
+SECRET = re.compile(r"(?<![\w-])secrets\b(?:\s*\.\s*(\w+)|\s*\[\s*\x00(\d+)\x00\s*\])?", re.I)
 
 def refers_to_secret(code, literals):
     for m in SECRET.finditer(code):
+        if code[:m.start()].rstrip().endswith("."):
+            continue
         name = m.group(1) or (literals[int(m.group(2))] if m.group(2) else "")
         if name.upper() != "GITHUB_TOKEN":
             return True
     return False
 
-def uses_secret(node, key=None):
-    """True if any expression in node refers to a secret other than GITHUB_TOKEN."""
+def uses_secret(node, condition=False):
+    """True if any expression in node refers to a secret other than GITHUB_TOKEN. A condition
+    (job or step if) is one expression when it has no ${{ }}, otherwise a template like any
+    other value."""
     if isinstance(node, dict):
-        return any(uses_secret(k, "key") or uses_secret(v, k) for k, v in node.items())
+        return any(uses_secret(k) or uses_secret(v) for k, v in node.items())
     if isinstance(node, list):
-        return any(uses_secret(v, key) for v in node)
+        return any(uses_secret(v) for v in node)
     if not isinstance(node, str):
         return False
-    # An if condition is an expression, with or without ${{ }}.
-    return any(refers_to_secret(*e) for e in expressions(node, whole=key == "if"))
+    whole = condition and "${{" not in node
+    return any(refers_to_secret(*e) for e in expressions(node, whole=whole))
+
+def job_uses_secret(job):
+    for key, value in job.items():
+        if uses_secret(key) or uses_secret(value, condition=key == "if"):
+            return True
+        if key == "steps" and isinstance(value, list):
+            for step in value:
+                if isinstance(step, dict) and uses_secret(step.get("if"), condition=True):
+                    return True
+    return False
+
+def literal_environment(job):
+    """The environment name if it is a non-empty literal string, else None. An expression could
+    resolve to an empty name, and the job would then read repository secrets."""
+    env = job.get("environment")
+    if isinstance(env, dict):
+        env = env.get("name")
+    if isinstance(env, str) and env.strip() and "${{" not in env:
+        return env
+    return None
 
 def triggers(w):
     on = w.get("on", w.get("true"))
@@ -127,7 +152,9 @@ def triggers(w):
     return set()
 
 def jobs(w):
-    return [(k, v) for k, v in (w.get("jobs") or {}).items() if isinstance(v, dict)]
+    """The jobs that are mappings; anything else is reported once below."""
+    j = w.get("jobs") if isinstance(w, dict) else None
+    return [(k, v) for k, v in j.items() if isinstance(v, dict)] if isinstance(j, dict) else []
 
 # Workflows that run for a pull request: triggered by one, or called from one (transitively).
 pr = [p for p, w in workflows.items()
@@ -137,7 +164,7 @@ while pr:
     path = pr.pop()
     for job_id, job in jobs(workflows[path]):
         where = f"jobs.{job_id}"
-        if uses_secret(job) or "secrets" in job:
+        if job_uses_secret(job) or "secrets" in job:
             error(path, f"{where}: runs for pull requests and must not use secrets")
         if "environment" in job:
             error(path, f"{where}: runs for pull requests and must not use an environment")
@@ -155,15 +182,21 @@ while pr:
 
 for path, w in workflows.items():
     if not isinstance(w, dict):
+        error(path, "not a mapping, so not checked for secrets")
         continue
+    if not isinstance(w.get("jobs"), dict):
+        error(path, "jobs is not a mapping, so the jobs are not checked for secrets")
     for key, value in w.items():
         if key != "jobs" and uses_secret(value):
             error(path, f"{key}: a secret at the workflow level reaches every job")
     for job_id, job in jobs(w):
         if "secrets" in job:
             error(path, f"jobs.{job_id}: secrets must not be passed to a called workflow")
-        elif uses_secret(job) and "environment" not in job:
-            error(path, f"jobs.{job_id}: a secret is used in a job without an environment")
+        elif job_uses_secret(job):
+            if "environment" not in job:
+                error(path, f"jobs.{job_id}: a secret is used in a job without an environment")
+            elif literal_environment(job) is None:
+                error(path, f"jobs.{job_id}: a job that uses a secret must name its environment as a non-empty literal, not an expression")
 sys.exit(1 if bad else 0)
 PY
 mapfile -d '' scripts < <(git ls-files -z --cached --others --exclude-standard -- '*.sh')

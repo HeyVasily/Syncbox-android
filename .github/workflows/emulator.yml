@@ -18,6 +18,7 @@ on:
       - 'dev/build-app.sh'
       - 'dev/build-bridge.sh'
       - 'dev/install-ndk.sh'
+      - 'gradlew'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
