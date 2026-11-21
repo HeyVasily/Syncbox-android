@@ -24,8 +24,8 @@ trap 'rm -rf -- "$work"' EXIT
 "$zizmor" --offline --strict-collection --no-progress --no-config --no-ignores --persona auditor \
   --format json --no-exit-codes .github > "$work/zizmor.json" || status=$?
 for i in "${!workflows[@]}"; do
-  "$yq" -o=json -I=0 'explode(.)' "${workflows[$i]}" > "$work/$i.json" ||
-    { printf '::error file=%s::not readable as YAML\n' "${workflows[$i]}"; status=1; }
+  # On failure the Python check below reports the workflow as unreadable.
+  "$yq" -o=json -I=0 'explode(.)' "${workflows[$i]}" > "$work/$i.json" || rm -f -- "$work/$i.json"
 done
 python3 -I - "$work" "${workflows[@]}" <<'PY' || status=$?
 import json, os, re, sys
@@ -37,25 +37,75 @@ def error(path, message):
     bad += 1
     print(f"::error file={path}::{message}")
 
-for finding in json.load(open(os.path.join(work, "zizmor.json"))):
-    if finding["ident"] != "secrets-outside-env":
-        continue
-    for loc in finding["locations"]:
-        if loc["symbolic"]["kind"] == "Primary":
-            path = loc["symbolic"]["key"].get("Local", {}).get("verbatim_path", "?")
-            row = loc["concrete"]["location"]["start_point"]["row"] + 1
-            error(path, f"line {row}: a secret is used outside an environment (zizmor secrets-outside-env)")
+try:
+    for finding in json.load(open(os.path.join(work, "zizmor.json"))):
+        if finding["ident"] != "secrets-outside-env":
+            continue
+        for loc in finding["locations"]:
+            if loc["symbolic"]["kind"] == "Primary":
+                path = loc["symbolic"]["key"].get("Local", {}).get("verbatim_path", "?")
+                row = loc["concrete"]["location"]["start_point"]["row"] + 1
+                error(path, f"line {row}: a secret is used outside an environment (zizmor secrets-outside-env)")
+except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+    error(".github", f"could not read zizmor's secrets-outside-env findings: {e!r}")
 
 workflows = {}
 for i, path in enumerate(paths):
     try:
         workflows[os.path.normpath(path)] = json.load(open(os.path.join(work, f"{i}.json")))
-    except (OSError, ValueError):
-        pass  # reported by the shell loop
+    except (OSError, ValueError) as e:
+        error(path, f"not readable as one YAML document, so not checked for secrets: {e!r}")
 
-EXPR = re.compile(r"\$\{\{(.*?)\}\}", re.S)
-SECRET = re.compile(r"(?<![\w.-])secrets\b")
-TOKEN = re.compile(r"""(?<![\w.-])secrets\s*(?:\.\s*GITHUB_TOKEN\b|\[\s*['"]GITHUB_TOKEN['"]\s*\])""")
+def strip_literals(text):
+    """Replaces each string literal ('...', where '' is a quote) with a placeholder \x00<n>\x00.
+    Returns the code, the literals, and the index of the first }} outside a literal, or None."""
+    code, literals, i = [], [], 0
+    while i < len(text):
+        if text[i] == "'":
+            j, value = i + 1, []
+            while j < len(text):
+                if text.startswith("''", j):
+                    value.append("'")
+                    j += 2
+                elif text[j] == "'":
+                    break
+                else:
+                    value.append(text[j])
+                    j += 1
+            code.append(f"\x00{len(literals)}\x00")
+            literals.append("".join(value))
+            i = j + 1
+        elif text.startswith("}}", i):
+            return "".join(code), literals, i
+        else:
+            code.append(text[i])
+            i += 1
+    return "".join(code), literals, None
+
+def expressions(text, whole):
+    """The ${{ }} expressions in text as (code, literals); with whole, all of text is one."""
+    if whole:
+        code, literals, _ = strip_literals(text.replace("${{", "   "))
+        return [(code.replace("}}", "  "), literals)]
+    found, start = [], text.find("${{")
+    while start >= 0:
+        code, literals, end = strip_literals(text[start + 3:])
+        found.append((code, literals))
+        if end is None:  # unterminated: the rest of the text is the expression
+            break
+        start = text.find("${{", start + 3 + end + 2)
+    return found
+
+# Context names are case-insensitive. Every reference to the secrets context counts, also the
+# bare object as in toJSON(secrets), except .GITHUB_TOKEN and ['GITHUB_TOKEN'].
+SECRET = re.compile(r"(?<![\w.-])secrets\b(?:\s*\.\s*(\w+)|\s*\[\s*\x00(\d+)\x00\s*\])?", re.I)
+
+def refers_to_secret(code, literals):
+    for m in SECRET.finditer(code):
+        name = m.group(1) or (literals[int(m.group(2))] if m.group(2) else "")
+        if name.upper() != "GITHUB_TOKEN":
+            return True
+    return False
 
 def uses_secret(node, key=None):
     """True if any expression in node refers to a secret other than GITHUB_TOKEN."""
@@ -65,10 +115,8 @@ def uses_secret(node, key=None):
         return any(uses_secret(v, key) for v in node)
     if not isinstance(node, str):
         return False
-    exprs = EXPR.findall(node)
-    if key == "if":  # an if condition is an expression without ${{ }}
-        exprs.append(node)
-    return any(len(SECRET.findall(e)) > len(TOKEN.findall(e)) for e in exprs)
+    # An if condition is an expression, with or without ${{ }}.
+    return any(refers_to_secret(*e) for e in expressions(node, whole=key == "if"))
 
 def triggers(w):
     on = w.get("on", w.get("true"))

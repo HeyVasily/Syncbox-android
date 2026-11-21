@@ -32,8 +32,13 @@ mkdir -p "$OUT"
 status=0
 fail() { printf '::error::%s\n' "$*"; status=1; }
 die() { fail "$*"; exit 1; }
-# The device log is kept whatever happens, also when an adb command ends the script early.
-trap 'adb logcat -d > "$OUT/logcat.txt" 2>/dev/null || true' EXIT
+# The device log and crash log are kept whatever happens, also when an adb command ends the
+# script early; crash.txt is read again only if the crash check below did not save it.
+save_logs() {
+  adb logcat -d > "$OUT/logcat.txt" 2>/dev/null || true
+  [ -f "$OUT/crash.txt" ] || adb logcat -d -b crash > "$OUT/crash.txt" 2>/dev/null || true
+}
+trap save_logs EXIT
 
 adb wait-for-device
 for _ in $(seq 300); do

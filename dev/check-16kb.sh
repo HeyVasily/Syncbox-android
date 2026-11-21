@@ -2,6 +2,7 @@
 # 16 KB page size checks for APKs and App Bundles. Reports every violation.
 # Each APK, and the set of APKs that bundletool generates from each App Bundle, is checked for:
 # - ZIP alignment of uncompressed files (zipalign -c -P 16), in every APK;
+# - every library built for the CPU of its ABI directory (ELF e_machine);
 # - every 64-bit library (arm64-v8a, x86_64) stored uncompressed, with every ELF LOAD segment
 #   aligned to 16 KB;
 # - the Syncthing bridge (libgojni.so) in each of arm64-v8a and x86_64, because it is built for
@@ -48,6 +49,8 @@ import struct, sys, zipfile
 
 PAGE = 16384
 ABIS = ("arm64-v8a", "x86_64")
+# ELF e_machine of each ABI directory: a library built for another CPU fails to load.
+MACHINES = {"arm64-v8a": (183, "AArch64"), "x86_64": (62, "x86-64"), "armeabi-v7a": (40, "ARM"), "x86": (3, "386")}
 BRIDGE = "libgojni.so"
 label, apks = sys.argv[1], sys.argv[2:]
 bad = checked = 0
@@ -57,13 +60,26 @@ for apk in apks:
         for info in z.infolist():
             name = info.filename
             abi = name.split("/")[1] if name.count("/") == 2 else ""
-            if not name.endswith(".so") or not name.startswith("lib/") or abi not in ABIS:
+            if not name.endswith(".so") or not name.startswith("lib/") or abi not in MACHINES:
                 continue
-            checked += 1
-            if name.rsplit("/", 1)[1] == BRIDGE:
-                found.add(abi)
             data = z.read(info)
             problems = []
+            machine, cpu = MACHINES[abi]
+            if data[:4] != b"\x7fELF" or len(data) < 0x14:
+                problems.append("not an ELF file")
+            else:
+                actual, = struct.unpack_from("<H", data, 0x12)
+                if actual != machine:
+                    problems.append(f"built for ELF machine {actual}, not {cpu} ({machine}) as {abi} needs")
+                elif abi in ABIS and name.rsplit("/", 1)[1] == BRIDGE:
+                    found.add(abi)
+            where = name if len(apks) == 1 else f"{apk.rsplit('/', 1)[-1]}: {name}"
+            if abi not in ABIS:
+                for problem in problems:
+                    print(f"::error file={label}::{where}: {problem}")
+                bad += bool(problems)
+                continue
+            checked += 1
             if info.compress_type != zipfile.ZIP_STORED:
                 problems.append("compressed; libraries must be stored uncompressed (useLegacyPackaging = false)")
             if data[:6] != b"\x7fELF\x02\x01":
@@ -87,7 +103,6 @@ for apk in apks:
                         problems.append("no LOAD segment")
                 except (struct.error, IndexError):
                     problems.append("truncated or malformed ELF file")
-            where = name if len(apks) == 1 else f"{apk.rsplit('/', 1)[-1]}: {name}"
             for problem in problems:
                 print(f"::error file={label}::{where}: {problem}")
             bad += bool(problems)

@@ -1,9 +1,9 @@
 name: Emulator
 
 # Instrumented tests on an emulator, about 5 minutes per job. Runs weekly, on demand, on pushes to
-# master, and on pull requests that change the app, the bridge, their build or dependencies, or
-# the instrumented tests and how they run; not on pull requests that change only docs or other
-# checks.
+# master, and on pull requests that change the app, the bridge, their build (Gradle files,
+# wrapper, build scripts, NDK install) or dependencies, or the instrumented tests and how they
+# run; not on pull requests that change only docs or other checks.
 on:
   schedule:
     - cron: '41 3 * * 2'
@@ -17,6 +17,11 @@ on:
       - 'dev/instrumented-tests.sh'
       - 'dev/build-app.sh'
       - 'dev/build-bridge.sh'
+      - 'dev/install-ndk.sh'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
       - 'app/build.gradle.kts'
       - 'app/src/main/**'
       - 'app/src/debug/**'
