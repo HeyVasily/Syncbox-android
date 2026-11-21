@@ -39,21 +39,31 @@ class AppStartTest {
         compose.onNodeWithText(compose.activity.getString(R.string.add_a_device)).assertIsDisplayed()
     }
 
-    /** The bridge library is mapped from the APK in place, not extracted, at the device's page size. */
+    /**
+     * The bridge library runs from the APK in place, not extracted, at the expected page size.
+     * dev/instrumented-tests.sh passes the expected page size and the byte range of the device
+     * ABI's libgojni.so in the APK ("start:end").
+     */
     @Test
     fun bridgeLibraryRunsFromTheApk() {
+        val args = InstrumentationRegistry.getArguments()
+        val expectedPageSize = requireNotNull(args.getString("pageSize")) { "run through dev/instrumented-tests.sh" }
+        val (start, end) = requireNotNull(args.getString("gojniRange")) { "run through dev/instrumented-tests.sh" }
+            .split(':').map(String::toLong)
         Bridge.running() // loads libgojni.so
         val info = compose.activity.applicationInfo
         assertFalse("libgojni.so was extracted", File(info.nativeLibraryDir, "libgojni.so").exists())
-        val executable = File("/proc/self/maps").readLines().filter { line ->
+        val maps = File("/proc/self/maps").readLines()
+        val bridgeCode = maps.filter { line ->
             val fields = line.trim().split(Regex("\\s+"))
-            fields.size >= 6 && fields[1].contains('x') && fields.last() == info.sourceDir
+            fields.size >= 6 && fields[1].contains('x') && fields.last() == info.sourceDir &&
+                fields[2].toLong(16) in start until end
         }
-        assertTrue("no executable mapping of ${info.sourceDir}", executable.isNotEmpty())
-        val pageSize = Os.sysconf(OsConstants._SC_PAGESIZE)
-        // CI passes the page size the emulator image must have (4096 or 16384).
-        InstrumentationRegistry.getArguments().getString("pageSize")?.let {
-            assertEquals("page size", it.toLong(), pageSize)
-        }
+        assertTrue(
+            "no executable mapping of ${info.sourceDir} inside libgojni.so ($start..$end):\n" +
+                maps.filter { it.endsWith(info.sourceDir) }.joinToString("\n"),
+            bridgeCode.isNotEmpty(),
+        )
+        assertEquals("page size", expectedPageSize.toLong(), Os.sysconf(OsConstants._SC_PAGESIZE))
     }
 }

@@ -4,8 +4,8 @@
 # - ZIP alignment of uncompressed files (zipalign -c -P 16), in every APK;
 # - every 64-bit library (arm64-v8a, x86_64) stored uncompressed, with every ELF LOAD segment
 #   aligned to 16 KB;
-# - at least one library for each of arm64-v8a and x86_64, because the Syncthing bridge is built
-#   for both;
+# - the Syncthing bridge (libgojni.so) in each of arm64-v8a and x86_64, because it is built for
+#   both;
 # - for a bundle: bundletool validate, and 16 KB alignment of uncompressed libraries in its config.
 # Usage: check-16kb.sh [apk|aab...]
 #   Default: every APK under */build/outputs/apk/ (except androidTest APKs, which have no
@@ -48,6 +48,7 @@ import struct, sys, zipfile
 
 PAGE = 16384
 ABIS = ("arm64-v8a", "x86_64")
+BRIDGE = "libgojni.so"
 label, apks = sys.argv[1], sys.argv[2:]
 bad = checked = 0
 found = set()
@@ -59,7 +60,8 @@ for apk in apks:
             if not name.endswith(".so") or not name.startswith("lib/") or abi not in ABIS:
                 continue
             checked += 1
-            found.add(abi)
+            if name.rsplit("/", 1)[1] == BRIDGE:
+                found.add(abi)
             data = z.read(info)
             problems = []
             if info.compress_type != zipfile.ZIP_STORED:
@@ -91,7 +93,7 @@ for apk in apks:
             bad += bool(problems)
 for abi in ABIS:
     if abi not in found:
-        print(f"::error file={label}::no {abi} library; the Syncthing bridge must be in every 64-bit ABI")
+        print(f"::error file={label}::no lib/{abi}/{BRIDGE}; the Syncthing bridge must be in every 64-bit ABI")
         bad += 1
 print(f"{checked} 64-bit libraries in {len(apks)} APK(s) checked, {bad} problem(s)")
 sys.exit(1 if bad else 0)
@@ -100,6 +102,7 @@ PY
 
 for input in "${inputs[@]}"; do
   printf '== %s\n' "$input"
+  [ -f "$input" ] || { error "$input" "no such file"; continue; }
   case "$input" in
     *.apk) check_apks "$input" "$input" ;;
     *.aab)

@@ -2,7 +2,7 @@
 # Official release binaries, verified by SHA-256 and cached in .build/tools.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks|osv-scanner|bundletool}"
+name="${1:?usage: pinned-tool.sh actionlint|zizmor|gitleaks|osv-scanner|bundletool|yq}"
 case "$(uname -sm)" in
   'Linux x86_64') arch=amd64; triple=x86_64-unknown-linux-gnu ;;
   'Linux aarch64') arch=arm64; triple=aarch64-unknown-linux-gnu ;;
@@ -50,6 +50,17 @@ case "$name" in
     url="https://github.com/google/osv-scanner/releases/download/v$version/osv-scanner_linux_$arch"
     member=archive
     ;;
+  yq)
+    version=4.54.2
+    # Official release API assets[].digest SHA-256 values:
+    # https://api.github.com/repos/mikefarah/yq/releases/tags/v4.54.2
+    case "$arch" in
+      amd64) checksum=44c7759059b4910827a0059a2757b22001e59360cdecdb2ef8dedc4b6c7e9f32 ;;
+      arm64) checksum=bd44211dcd29a5f0eb701d4b7eb5ccd0cfff3bd3966cb4f7f9bd5b13701d997e ;;
+    esac
+    url="https://github.com/mikefarah/yq/releases/download/v$version/yq_linux_$arch"
+    member=archive
+    ;;
   bundletool)
     # A Java archive: the same file on every platform. Run it with java -jar.
     version=1.18.3
@@ -83,6 +94,7 @@ case "$name" in
   gitleaks) actual="$("$tool" version)"; expected="$version" ;;
   osv-scanner) actual="$("$tool" --version)"; expected="osv-scanner version: $version" ;;
   bundletool) actual="$(java -jar "$tool" version)"; expected="$version" ;;
+  yq) actual="$("$tool" --version)"; expected="yq (https://github.com/mikefarah/yq/) version v$version" ;;
 esac
 [ "${actual%%$'\n'*}" = "$expected" ] || { printf 'unexpected %s version\n' "$name" >&2; exit 1; }
 printf '%s\n' "$tool"

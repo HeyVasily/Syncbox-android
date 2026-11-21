@@ -14,5 +14,7 @@ status=0
 # Strict verification overrides a lenient or off setting in gradle.properties.
 bash gradlew --no-daemon --continue --stacktrace --dependency-verification strict \
   lint testDebugUnitTest assembleDebug bundleRelease assembleDebugAndroidTest || status=1
-bash dev/check-16kb.sh || status=1
+# The expected outputs by name, so a missing one fails instead of being skipped.
+bash dev/check-16kb.sh app/build/outputs/apk/debug/app-debug.apk \
+  app/build/outputs/bundle/release/app-release.aab || status=1
 exit "$status"

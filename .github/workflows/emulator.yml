@@ -1,7 +1,9 @@
 name: Emulator
 
-# Instrumented tests on an emulator: too slow for every pull request. Runs weekly, on demand, on
-# pushes to master, and on pull requests that change the instrumented tests or how they run.
+# Instrumented tests on an emulator, about 5 minutes per job. Runs weekly, on demand, on pushes to
+# master, and on pull requests that change the app, the bridge, their build or dependencies, or
+# the instrumented tests and how they run; not on pull requests that change only docs or other
+# checks.
 on:
   schedule:
     - cron: '41 3 * * 2'
@@ -13,14 +15,22 @@ on:
     paths:
       - '.github/workflows/emulator.yml'
       - 'dev/instrumented-tests.sh'
+      - 'dev/build-app.sh'
+      - 'dev/build-bridge.sh'
+      - 'app/build.gradle.kts'
+      - 'app/src/main/**'
+      - 'app/src/debug/**'
       - 'app/src/androidTest/**'
+      - 'engine/**'
+      - 'gradle/libs.versions.toml'
+      - 'gradle/verification-metadata.xml'
 
 permissions:
   contents: read
 
-# A newer run for the same pull request or branch replaces the running one.
+# A new push to a pull request replaces its running check. Every other run is kept.
 concurrency:
-  group: emulator-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 jobs:

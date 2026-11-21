@@ -11,7 +11,7 @@ The repository is public. `.github/workflows/ci.yml` runs on every pull request 
 | CodeQL | `.github/workflows/codeql.yml` | code scanning of Kotlin, Go and the workflows; not part of `dev/check.sh` |
 | Emulator | `.github/workflows/emulator.yml` | instrumented tests on API 34 (4 KB pages) and API 36 (16 KB pages); not part of `dev/check.sh` |
 
-Tools are official release binaries (bundletool: its release JAR) pinned by version and SHA-256 in `dev/pinned-tool.sh`, cached in `.build/tools/`. Actions are pinned by commit SHA; Dependabot updates them weekly.
+Tools (actionlint, zizmor, gitleaks, OSV-Scanner, yq, bundletool) are official release binaries, for bundletool its release JAR, pinned by version and SHA-256 in `dev/pinned-tool.sh`, cached in `.build/tools/`. Actions are pinned by commit SHA; Dependabot updates them weekly.
 
 ## Android
 
@@ -29,22 +29,26 @@ The app build compiles the Syncthing bridge from `engine/` (`dev/build-bridge.sh
 
 - `zipalign -c -P 16`;
 - every `arm64-v8a` and `x86_64` library is stored uncompressed, and every LOAD segment is aligned to 16 KB;
-- each of `arm64-v8a` and `x86_64` has at least one library (for a bundle: in one of its splits), because the Syncthing bridge is built for both.
+- each of `arm64-v8a` and `x86_64` has the Syncthing bridge, `libgojni.so` (for a bundle: in one of its splits).
+
+`dev/check-android.sh` passes it the debug APK and the release bundle by path, so a missing output fails the check.
 
 At runtime the emulator workflow checks the app on a 16 KB device. Background: [research/16kb-page-size.md](research/16kb-page-size.md).
 
 ## Emulator
 
-`.github/workflows/emulator.yml` runs the instrumented tests (`app/src/androidTest`) with `dev/instrumented-tests.sh --device` on GitHub's hosted runners, which have KVM, in two jobs: API 34 (minSdk) with the standard image, and API 36 (targetSdk) with the `google_apis_ps16k` image, whose page size is 16 KB. The script checks the page size the job expects, installs the debug app and its test APK fresh, runs them with `am instrument`, and fails on a failed test or an app crash in logcat. The tests start the real Syncthing through the bridge and check that its library runs from the APK in place. On 16 KB pages the script also fails unless `dumpsys package` shows `pageSizeCompat=0`, that is, Android runs the app without page size compatibility mode; as a control, a copy of the APK with its libraries moved to 4 KB offsets must get a nonzero value. It does not use Gradle's `connectedDebugAndroidTest`, which downloads the Unified Test Platform outside `gradle/verification-metadata.xml`.
+`.github/workflows/emulator.yml` runs the instrumented tests (`app/src/androidTest`) with `dev/instrumented-tests.sh --device` on GitHub's hosted runners, which have KVM, in two jobs: API 34 (minSdk) with the standard image, and API 36 (targetSdk) with the `google_apis_ps16k` image, whose page size is 16 KB. The script checks the page size the job expects, installs the debug app and its test APK fresh, runs them with `am instrument`, and fails on a failed test or an app crash in logcat. The tests start the real Syncthing through the bridge, and check that an executable mapping of `base.apk` lies inside the bytes of `libgojni.so` in the APK, so the library runs from the APK in place. The script refuses to run the tests over an existing install, and keeps logcat and the crash log in `.build/instrumented/` on every exit. On 16 KB pages the script also fails unless `dumpsys package` shows `pageSizeCompat=0`, that is, Android runs the app without page size compatibility mode; as a control, a copy of the APK with its libraries moved to 4 KB offsets must get a nonzero value. It does not use Gradle's `connectedDebugAndroidTest`, which downloads the Unified Test Platform outside `gradle/verification-metadata.xml`.
 
-The workflow is too slow for every pull request. It runs weekly, on demand (`workflow_dispatch`), on pushes to `master`, and on every push to a pull request whose changes include the workflow, the script or the instrumented tests. A newer run for the same branch or pull request cancels the running one. Locally, `bash dev/instrumented-tests.sh` builds and runs the same tests on an emulator from android-broker (`E2E_API`, default 36; the broker has no 16 KB image).
+Each job takes about 5 minutes. The workflow runs weekly, on demand (`workflow_dispatch`), on pushes to `master`, and on every push to a pull request whose changes include the app (`app/build.gradle.kts`, `app/src/main`, `app/src/debug`, `app/src/androidTest`), the bridge (`engine/`), the dependency files, the build scripts, the workflow or `dev/instrumented-tests.sh`; not for changes to docs or other checks alone. A new push to a pull request cancels its running check; other runs are never cancelled. Locally, `bash dev/instrumented-tests.sh` builds and runs the same tests on an emulator from android-broker (`E2E_API`, default 36; the broker has no 16 KB image).
 
 ## Secrets and release signing
 
-There is no release workflow yet. When one is added, its signing keys are secrets of a GitHub environment (for example `release`) that allows only `master` or release tags and needs a reviewer; that protection is a repository setting that no check here can see. `dev/lint-workflows.sh` enforces the part in the files:
+There is no release workflow yet. When one is added, its signing keys are secrets of a GitHub environment (for example `release`) that allows only `master` or release tags and needs a reviewer; that protection is a repository setting that no check here can see. `dev/lint-workflows.sh` enforces the part in the files. It reads the workflows as YAML with the pinned `yq`, so quoted keys, anchors and multiline expressions are seen as GitHub sees them, and finds secrets in every `${{ }}` expression and `if` condition. `GITHUB_TOKEN` is not counted as a secret.
 
-- a job that uses a secret other than `GITHUB_TOKEN` must name an `environment` (zizmor's `secrets-outside-env` audit, run at the auditor level);
-- a workflow that `pull_request` or `pull_request_target` triggers uses no secret other than `GITHUB_TOKEN`, no `secrets: inherit`, and no `environment`.
+- A secret is used only inside a job that names an `environment`: not in workflow-level `env` or any other workflow-level key.
+- No job passes secrets to a called workflow, neither `secrets: inherit` nor a `secrets` mapping (a calling job cannot name an environment).
+- A workflow that `pull_request` or `pull_request_target` triggers, and every local workflow it calls, uses no secret and no `environment`, and calls no workflow from another repository.
+- Second opinion: zizmor's auditor-level `secrets-outside-env` audit, with its configuration and ignore comments switched off (`--no-config --no-ignores`).
 
 ## Dependencies
 
