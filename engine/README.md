@@ -77,7 +77,7 @@ Example: `ENGINE_SCAN_FILES=100000 ENGINE_SCAN_LINES=100,1000,5000 bash dev/test
 - Syncthing v2.1.7, commit `d6d0181f7d466381c4b39ec8fd944c364f939b32`, as the
   pseudo-version `v1.30.0-rc.1.0.20261020195438-d6d0181f7d46`; the module
   path has no `/v2`, so the tag cannot be required directly.
-- Go 1.26.2, which this Syncthing requires. With an older `go` installed,
+- Go 1.26.11, pinned in `engine/go.mod`. With an older `go` installed,
   `GOTOOLCHAIN=auto` (the default) downloads it.
 - Syncthing's two `replace` directives are copied into `go.mod`. The
   `jackpal/gateway` one targets v1.1.1 while Syncthing requires v1.2.0, so it

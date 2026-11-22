@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Known vulnerabilities in dependencies, from the OSV database. Needs network access.
+# Known vulnerabilities in dependencies and the Go standard library. Needs network access.
 # Does nothing until a dependency manifest exists.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -25,6 +25,11 @@ status=0
 # 128: the manifests list no packages, for example a go.mod without requirements.
 if [ "$status" -eq 128 ]; then
   printf 'the manifests list no packages: nothing to audit\n'
-  exit 0
+  status=0
+fi
+if [ -f engine/go.mod ]; then
+  # Scan the noassets build with the same Go version as dev/build-bridge.sh.
+  (cd engine && GOTOOLCHAIN="go$(sed -n 's/^go //p' go.mod)" \
+    go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 -tags noassets ./...) || status=$?
 fi
 exit "$status"
