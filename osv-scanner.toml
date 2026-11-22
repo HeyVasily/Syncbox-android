@@ -1,6 +1,6 @@
 # Advisories accepted by the dependency audit (dev/audit-deps.sh).
 #
-# Every package below is a transitive dependency of the Android Gradle Plugin 9.5.1 or of the
+# Every package below is a transitive dependency of the Android Gradle Plugin 9.5.2 or of the
 # Lint tool. They run on the build machine only and are in none of the app's runtime classpaths
 # (checked with `./gradlew :app:dependencies`), so they are not packaged into the app.
 # They are listed in gradle/verification-metadata.xml because Gradle downloads them for the build.

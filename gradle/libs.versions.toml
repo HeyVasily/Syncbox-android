@@ -1,6 +1,6 @@
 # Newest stable versions that still compile against android-36 (newer AndroidX releases require compileSdk 37).
 [versions]
-agp = "9.5.1"
+agp = "9.5.2"
 kotlin = "2.4.21"
 composeBom = "2026.06.01"
 activityCompose = "1.13.0"
