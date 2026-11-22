@@ -32,7 +32,7 @@ Taken by `bash dev/e2e-emulator.sh --screenshots` ([verification.md](../../verif
 
 Run `bash dev/screenshots.sh` (or `bash dev/screenshots.sh <scene>...` for some of them). It builds the debug APK, leases an emulator from `android-broker`, opens each scene in the light and the dark theme, and saves the PNGs here at 540 x 960 with an 8-bit palette. It needs ImageMagick.
 
-- Build: AGP from the [version catalog](../../../gradle/libs.versions.toml), Gradle 9.9.1, Kotlin 2.4.21, Compose BOM 2026.06.01 (Material 3 1.4.0), compileSdk and targetSdk 36.
+- Build the demo with AGP from the [version catalog](../../../gradle/libs.versions.toml), Gradle 9.9.1, Kotlin 2.4.21, Compose BOM 2026.11.01 (Material 3 1.5.0), compileSdk 37.2 and targetSdk 36.
 - Emulator: `android-broker` phone profile, API 36 `google_apis` x86_64 image (build `BE2A.250530.026.F3`), 1080 x 1920 at 420 dpi, software GLES.
 - Status bar in SystemUI demo mode: clock 12:00, full battery and Wi-Fi.
 - A scene is a fixed demo state opened by a debug-only intent extra, after a force stop so the demo data starts fresh: `adb shell am start -n app.avoska/.MainActivity --es scene files-syncing`. Scene names are the file names without the theme suffix. They live in `app/src/debug/java/app/avoska/DebugHooks.kt`; release builds contain a no-op instead.

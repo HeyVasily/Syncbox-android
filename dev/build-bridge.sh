@@ -5,7 +5,7 @@
 # the app's buildBridge task; it can also be run on its own.
 #
 # Needs: ANDROID_NDK_HOME (NDK r30, 30.0.16248370), ANDROID_HOME (or
-# ANDROID_SDK_ROOT) with platform android-36, and any go: the build runs with
+# ANDROID_SDK_ROOT) with platform android-37.2, and any go: the build runs with
 # exactly the Go version engine/go.mod names (GOTOOLCHAIN=go<version>, fetched
 # if needed), so a newer local Go does not change the AAR. A toolchain line in
 # go.mod would not do that: it is only a minimum, and go mod tidy drops it

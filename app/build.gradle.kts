@@ -5,7 +5,12 @@ plugins {
 
 android {
     namespace = "app.avoska"
-    compileSdk = 36
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "app.avoska"

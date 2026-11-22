@@ -12,7 +12,7 @@ How the app is checked, from host-only tests to the installed app on an emulator
 
 ## Toolchain
 
-- JDK 17, Android SDK with platform `android-36` and build-tools `36.0.0` (`ANDROID_HOME`).
+- JDK 17, Android SDK with platform `android-37.2` and build-tools `37.0.0` (`ANDROID_HOME`).
 - NDK r30, `30.0.16248370`, at `ANDROID_NDK_HOME`. The shared SDK may be read-only; install the NDK into a writable SDK root and point the variable at it, for example `sdkmanager --sdk_root=$HOME/.cache/avoska-sdk "ndk;30.0.16248370"` and `export ANDROID_NDK_HOME=$HOME/.cache/avoska-sdk/ndk/30.0.16248370`.
 - Go 1.26.11, as specified in `engine/go.mod`. With an older `go` installed, `GOTOOLCHAIN=auto` fetches it.
 - gomobile and gobind `v0.0.0-20261011034528-197770444867`, pinned by `tool` directives in `engine/go.mod` and built into `.build/bridge/bin/` by `dev/build-bridge.sh`.

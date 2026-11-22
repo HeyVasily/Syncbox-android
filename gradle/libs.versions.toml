@@ -1,14 +1,12 @@
-# Newest stable versions that still compile against android-36 (newer AndroidX releases require compileSdk 37).
 [versions]
 agp = "9.5.2"
 kotlin = "2.4.21"
-composeBom = "2026.06.01"
+composeBom = "2026.11.01"
 activityCompose = "1.13.0"
 lifecycle = "2.10.0"
 navigation3 = "1.2.1"
 qrcodegen = "1.8.0"
-# 5.5.x requires compileSdk 37.
-okhttp = "5.4.0"
+okhttp = "5.5.1"
 serialization = "1.13.0"
 junit = "4.13.2"
 # Test-only. The app uses the kotlinx-coroutines version that AndroidX brings; unit tests run on this one.
