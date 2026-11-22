@@ -1,6 +1,9 @@
 # Local tools and check output
 .build/
 
+# Local notes that stay out of the public repository
+private/
+
 # Android and Gradle
 .gradle/
 .kotlin/
