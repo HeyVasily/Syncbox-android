@@ -1,0 +1,8 @@
+on: pull_request
+env:
+  VALUE: ${{ Secrets.X }}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'true'

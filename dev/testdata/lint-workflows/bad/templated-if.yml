@@ -1,0 +1,7 @@
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ true }} && ${{ secrets.X != '' }}
+        run: 'true'

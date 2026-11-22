@@ -7,5 +7,7 @@ for check in check-secrets check-repo lint-workflows check-android; do
   printf '== %s\n' "$check"
   bash "dev/$check.sh" || failed+=("$check")
 done
+printf '== lint-workflows --self-test\n'
+bash dev/lint-workflows.sh --self-test || failed+=("lint-workflows --self-test")
 [ "${#failed[@]}" -eq 0 ] || { printf 'failed: %s\n' "${failed[*]}" >&2; exit 1; }
 printf 'all checks passed\n'

@@ -1,0 +1,8 @@
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'true'
+        env:
+          VALUE: ${{ format('}}{0}', secrets.X) }}
