@@ -3,8 +3,8 @@
 # debug app and an unsigned, minified release app (exercises R8), runs Android lint and the JVM
 # unit tests, then checks 16 KB page support of both APKs: native libraries stored uncompressed,
 # 16 KB ZIP alignment (zipalign -P 16) and 16 KB ELF LOAD alignment.
-# Needs ANDROID_HOME (or ANDROID_SDK_ROOT) pointing at an SDK with platform android-36 and
-# build-tools 36.0.0, and ANDROID_NDK_HOME pointing at NDK 30.0.16248370.
+# Needs ANDROID_HOME (or ANDROID_SDK_ROOT) pointing at an SDK with platform android-37.2 and
+# build-tools 37.0.0, and ANDROID_NDK_HOME pointing at NDK 30.0.16248370.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
@@ -20,7 +20,7 @@ fi
 
 ./gradlew --console=plain assembleDebug assembleRelease lintDebug testDebugUnitTest "$@"
 
-zipalign="$sdk/build-tools/36.0.0/zipalign"
+zipalign="$sdk/build-tools/37.0.0/zipalign"
 readelf="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
