@@ -109,7 +109,8 @@ compat() {
 control_apk() {
   local sdk tools key
   sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
-  tools="$(find "$sdk/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+  tools="$(find "$sdk/build-tools" -mindepth 1 -maxdepth 1 -type d ! -name '*-rc*' | sort -V | tail -n 1)"
+  [ -n "$tools" ] || { printf 'no stable Build Tools under %s/build-tools\n' "$sdk" >&2; return 1; }
   python3 -I - "$APK" "$1.unsigned" <<'PY' || return 1
 import struct, sys, zipfile
 with zipfile.ZipFile(sys.argv[1]) as src, zipfile.ZipFile(sys.argv[2], "w") as out:

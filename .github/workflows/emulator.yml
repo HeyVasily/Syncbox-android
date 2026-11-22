@@ -1,6 +1,6 @@
 name: Emulator
 
-# Instrumented tests on an emulator, about 5 minutes per job. Runs weekly, on demand, on pushes to
+# Instrumented tests on an emulator, 5 to 7 minutes per job. Runs weekly, on demand, on pushes to
 # master, and on pull requests that change the app, the bridge, their build (Gradle files,
 # wrapper, build scripts, NDK install) or dependencies, or the instrumented tests and how they
 # run; not on pull requests that change only docs or other checks.

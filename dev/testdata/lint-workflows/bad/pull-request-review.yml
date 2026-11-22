@@ -1,0 +1,9 @@
+on: pull_request_review
+jobs:
+  test:
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'true'
+        env:
+          VALUE: ${{ secrets.X }}

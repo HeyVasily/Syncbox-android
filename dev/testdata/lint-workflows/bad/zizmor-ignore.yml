@@ -1,0 +1,8 @@
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'true'
+        env:
+          VALUE: ${{ secrets.X }} # zizmor: ignore[secrets-outside-env]
