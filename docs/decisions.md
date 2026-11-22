@@ -24,7 +24,7 @@ All decided on 2026-11-02.
 - **App name:** "Avoska"; the repository becomes `avoska-android`. The store title is the Latin "Avoska"; the product targets the worldwide market.
 - **Git workflow:** short branches with pull requests into `master`. Agents commit and open pull requests when the operator asks; merging needs the operator's approval.
 - **Syncthing integration:** unmodified Syncthing runs in-process as a Go library through a thin gomobile bridge (`engine/bridge`), controlled through its REST API.
-- **Toolchain:** Go 1.26.2, NDK r30 (`30.0.16248370`), Syncthing pinned in `engine/go.mod`, AGP 9.5.1, compileSdk and targetSdk 36.
+- **Toolchain:** Go 1.26.2, NDK r30 (`30.0.16248370`), Syncthing pinned in `engine/go.mod`, AGP 9.5.2, compileSdk and targetSdk 36.
 - **App design (2026-11-14):** approved. Screens and flows are in [design/flows.md](design/flows.md), visual style and control layout in [design/ui.md](design/ui.md).
 
 ## Proposed, not yet confirmed

@@ -19,7 +19,7 @@ The app compiles against android-37, so AndroidX and Compose releases that need 
 - [ ] `compileSdk = 37` in `app/build.gradle.kts`; CI and the local setup install platform android-37.
 - [ ] The android-36 notes are updated: the comment in `gradle/libs.versions.toml`, `dev/build-app.sh`, `dev/build-bridge.sh`, `docs/verification.md`, `docs/design/screenshots/README.md`.
 - [ ] The compileSdk 37 `ignore` rules in `.github/dependabot.yml` (Compose BOM, okhttp) are removed, and both are on the newest stable versions.
-- [ ] AGP 9.5.1 (or the version in use) supports compileSdk 37 without warnings.
+- [ ] AGP 9.5.2 (or the version in use) supports compileSdk 37 without warnings.
 - [ ] `bash dev/check.sh` passes, and all CI checks pass.
 
 ## Done
