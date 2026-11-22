@@ -1,7 +1,7 @@
 name: Dependency audit
 
-# Runs when a dependency manifest changes, in a pull request or on master. New advisories appear
-# without any change in the repository, so it also runs on a schedule.
+# Runs when dependency manifests or bridge code change, in a pull request or on master.
+# New advisories appear without any change in the repository, so it also runs on a schedule.
 on:
   schedule:
     - cron: '23 5 * * *'
@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - '**/go.mod'
+      - 'engine/**/*.go'
       - '**/gradle.lockfile'
       - '**/buildscript-gradle.lockfile'
       - 'gradle/verification-metadata.xml'
@@ -21,6 +22,7 @@ on:
       - master
     paths:
       - '**/go.mod'
+      - 'engine/**/*.go'
       - '**/gradle.lockfile'
       - '**/buildscript-gradle.lockfile'
       - 'gradle/verification-metadata.xml'
@@ -40,5 +42,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Audit dependencies against the OSV database
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: engine/go.mod
+          cache-dependency-path: engine/go.sum
+      - name: Audit dependencies
         run: bash dev/audit-deps.sh
