@@ -35,6 +35,8 @@ export GOTOOLCHAIN
 go build -o "$OUT/bin/" golang.org/x/mobile/cmd/gomobile golang.org/x/mobile/cmd/gobind
 export PATH="$OUT/bin:$PATH"
 
+# Skip VCS stamping so a stray .git above gomobile's temporary build directory cannot break the build.
+export GOFLAGS="${GOFLAGS:+$GOFLAGS }-buildvcs=false"
 start=$(date +%s)
 # -checklinkname=0: Syncthing's anet dependency links to Go internals.
 # The page-size flags keep 16 KB alignment explicit (NDK r28+ defaults to it).
