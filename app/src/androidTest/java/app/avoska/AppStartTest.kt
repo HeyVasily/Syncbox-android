@@ -1,0 +1,69 @@
+package app.avoska
+
+import android.system.Os
+import android.system.OsConstants
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import app.avoska.engine.Connection
+import app.avoska.engine.DeviceIds
+import app.avoska.syncthing.bridge.Bridge
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.File
+
+/**
+ * The installed debug app on a fresh install: real Syncthing through the gomobile bridge, no
+ * device added yet. Runs on an emulator in CI (.github/workflows/emulator.yml).
+ */
+@RunWith(AndroidJUnit4::class)
+class AppStartTest {
+    @get:Rule
+    val compose = createAndroidComposeRule<MainActivity>()
+
+    @Test
+    fun firstLaunchRunsSyncthingInTheAppProcess() {
+        val engine = (compose.activity.application as AvoskaApp).container().engine
+        // The first start creates Syncthing's keys and config, which is slow on an emulator.
+        compose.waitUntil(timeoutMillis = 120_000) { engine.status.value.connection == Connection.NoDevice }
+        val status = engine.status.value
+        assertTrue("device ID ${status.thisDeviceId}", DeviceIds.isValid(status.thisDeviceId))
+        assertTrue(Bridge.running())
+        assertEquals(status.thisDeviceId, Bridge.deviceID())
+        compose.onNodeWithText(compose.activity.getString(R.string.add_a_device)).assertIsDisplayed()
+    }
+
+    /**
+     * The bridge library runs from the APK in place, not extracted, at the expected page size.
+     * dev/instrumented-tests.sh passes the expected page size and the byte range of the device
+     * ABI's libgojni.so in the APK ("start:end").
+     */
+    @Test
+    fun bridgeLibraryRunsFromTheApk() {
+        val args = InstrumentationRegistry.getArguments()
+        val expectedPageSize = requireNotNull(args.getString("pageSize")) { "run through dev/instrumented-tests.sh" }
+        val (start, end) = requireNotNull(args.getString("gojniRange")) { "run through dev/instrumented-tests.sh" }
+            .split(':').map(String::toLong)
+        Bridge.running() // loads libgojni.so
+        val info = compose.activity.applicationInfo
+        assertFalse("libgojni.so was extracted", File(info.nativeLibraryDir, "libgojni.so").exists())
+        val maps = File("/proc/self/maps").readLines()
+        val bridgeCode = maps.filter { line ->
+            val fields = line.trim().split(Regex("\\s+"))
+            fields.size >= 6 && fields[1].contains('x') && fields.last() == info.sourceDir &&
+                fields[2].toLong(16) in start until end
+        }
+        assertTrue(
+            "no executable mapping of ${info.sourceDir} inside libgojni.so ($start..$end):\n" +
+                maps.filter { it.endsWith(info.sourceDir) }.joinToString("\n"),
+            bridgeCode.isNotEmpty(),
+        )
+        assertEquals("page size", expectedPageSize.toLong(), Os.sysconf(OsConstants._SC_PAGESIZE))
+    }
+}
